@@ -19,22 +19,29 @@ async function addFavorite(userId, recipeId) {
     throw error;
   }
 
-  // Clear any existing rows for this user/recipe pair before inserting so the
-  // insert never fails due to missing constraints while still keeping the
-  // table deduplicated.
-  await removeFavorite(userId, recipeId);
+  const payload = [{
+    user_id: userId,
+    recipe_id: recipeId,
+    created_at: new Date().toISOString(),
+  }];
 
-  const insertQuery = buildQuery({ select: 'recipe_id' });
+  const insertQuery = buildQuery({ select: 'recipe_id', on_conflict: 'user_id,recipe_id' });
   const inserted = await supabaseRequest(`/favorites${insertQuery}`, {
     method: 'POST',
-    body: [{ user_id: userId, recipe_id: recipeId, created_at: new Date().toISOString() }],
-    prefer: 'return=representation',
+    body: payload,
+    prefer: 'resolution=merge-duplicates,return=representation',
   });
 
-  if (!Array.isArray(inserted) || inserted.length === 0 || !inserted.some(row => row.recipe_id === recipeId)) {
-    const error = new Error('Favorite could not be saved');
-    error.status = 500;
-    throw error;
+  const savedRecipeId = inserted?.[0]?.recipe_id ?? inserted?.find?.(row => row?.recipe_id)?.recipe_id;
+  if (!savedRecipeId) {
+    // Retry fetch to confirm whether an existing row already satisfied the merge behavior
+    const refreshed = await getFavorites(userId);
+    if (!refreshed.includes(recipeId)) {
+      const error = new Error('Favorite could not be saved');
+      error.status = 500;
+      throw error;
+    }
+    return refreshed;
   }
 
   return getFavorites(userId);
