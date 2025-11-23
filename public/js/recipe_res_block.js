@@ -159,16 +159,16 @@ function attachBookmarkListeners(handler) {
 
   document.querySelectorAll('.bookmark-btn').forEach(btn => {
 
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.stopPropagation(); // 카드 클릭 방지
       e.preventDefault();  // 링크 이동 방지
 
       // 🔒 로그인 상태 체크
       const currentUser = localStorage.getItem('currentUser');
-      
+
       if (!currentUser || currentUser === 'null' || currentUser === 'undefined') {
         showLoginRequestNotification();
-        return; 
+        return;
       }
 
       const id = btn.dataset.bookmarkId;
@@ -177,8 +177,17 @@ function attachBookmarkListeners(handler) {
       const isActive = btn.classList.toggle('active');
       btn.textContent = isActive ? '♥' : '♡';
 
-      // 페이지별 핸들러 실행
-      if (handler) handler(id);
+      if (handler) {
+        try {
+          await handler(id, isActive);
+        } catch (err) {
+          console.error(err);
+          // rollback on failure
+          btn.classList.toggle('active');
+          btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
+          showToastNotification('즐겨찾기 반영에 실패했습니다.');
+        }
+      }
     });
 
   });

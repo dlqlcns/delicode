@@ -2,7 +2,9 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     const authBtn = document.getElementById("authBtn");
-    
+    const headerSearchInput = document.getElementById('headerSearchInput');
+    const headerSearchIcon = document.getElementById('headerSearchIcon');
+
     if (!authBtn) return;
 
     // ✅ JSON 파싱 시도 + null/빈 문자열 체크
@@ -37,6 +39,19 @@ document.addEventListener("DOMContentLoaded", () => {
         authBtn.textContent = "로그인 / 회원가입";
         authBtn.addEventListener("click", () => {
             window.location.href = "login.html";
+        });
+    }
+
+    if (headerSearchInput) {
+        headerSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (typeof handleSearch === 'function') {
+                    handleSearch();
+                } else if (headerSearchIcon) {
+                    headerSearchIcon.click();
+                }
+            }
         });
     }
 });

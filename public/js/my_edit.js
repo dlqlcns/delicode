@@ -10,35 +10,51 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = document.querySelector('.save-btn');
   const dangerBtn = document.querySelector('.danger-btn');
 
-  // 로그인된 유저 데이터 불러오기
-  function loadUserData() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  function getCurrentUser() {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      return null;
+    }
+  }
 
-    if (!currentUser) {
+  // 로그인된 유저 데이터 불러오기
+  async function loadUserData() {
+    const stored = getCurrentUser();
+
+    if (!stored) {
       alert('로그인이 필요합니다.');
       location.href = 'login.html';
       return;
     }
 
-    // 이름, 이메일
-    nameInput.value = currentUser.name || '';
-    emailInput.value = currentUser.email || '';
+    try {
+      const response = await window.apiClient.fetchUserApi(stored.id);
+      const user = response.user;
+      localStorage.setItem('currentUser', JSON.stringify(user));
 
-    // 알레르기 체크박스 적용
-    allergyCheckboxes.forEach(cb => {
-      cb.checked = currentUser.allergies?.includes(cb.value) || false;
-    });
+      nameInput.value = user.username || '';
+      emailInput.value = user.email || '';
 
-    // 선호 요리 카테고리 체크박스 적용
-    preferenceCheckboxes.forEach(cb => {
-      cb.checked = currentUser.preferences?.includes(cb.value) || false;
-    });
+      allergyCheckboxes.forEach(cb => {
+        cb.checked = user.allergies?.includes(cb.value) || false;
+      });
+
+      preferenceCheckboxes.forEach(cb => {
+        cb.checked = user.ingredients?.includes(cb.value) || false;
+      });
+    } catch (err) {
+      console.error(err);
+      alert('사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.');
+      location.href = 'login.html';
+    }
   }
 
   // 저장 버튼
   if (saveBtn) {
-    saveBtn.addEventListener('click', () => {
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    saveBtn.addEventListener('click', async () => {
+      const currentUser = getCurrentUser();
       if (!currentUser) return;
 
       const newName = nameInput.value.trim();
@@ -55,60 +71,52 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // 알레르기 수집
       const allergies = [...allergyCheckboxes]
         .filter(cb => cb.checked)
         .map(cb => cb.value);
 
-      // 선호 요리 카테고리 수집
       const preferences = [...preferenceCheckboxes]
         .filter(cb => cb.checked)
         .map(cb => cb.value);
 
-      // currentUser 업데이트
-      currentUser.name = newName;
-      currentUser.email = newEmail;
-      currentUser.allergies = allergies;
-      currentUser.preferences = preferences;
+      try {
+        const response = await window.apiClient.updateUserApi(currentUser.id, {
+          username: newName,
+          email: newEmail,
+          allergies,
+          ingredients: preferences,
+        });
 
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-      // userList도 업데이트
-      const userList = JSON.parse(localStorage.getItem('userList')) || [];
-      const idx = userList.findIndex(u => u.userId === currentUser.userId);
-
-      if (idx !== -1) {
-        userList[idx] = currentUser;
-        localStorage.setItem('userList', JSON.stringify(userList));
+        localStorage.setItem('currentUser', JSON.stringify(response.user));
+        alert('프로필이 저장되었습니다.');
+        location.href = 'mypage.html';
+      } catch (err) {
+        console.error(err);
+        alert('프로필을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.');
       }
-
-      alert('프로필이 저장되었습니다.');
-      location.href = 'mypage.html';
     });
   }
 
   // 초기화 버튼
   if (dangerBtn) {
-    dangerBtn.addEventListener('click', () => {
+    dangerBtn.addEventListener('click', async () => {
       if (!confirm("정말 초기화하시겠습니까?\n알레르기 정보와 선호 카테고리가 모두 삭제됩니다.")) return;
 
-      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-      if (currentUser) {
-        currentUser.allergies = [];
-        currentUser.preferences = [];
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      const currentUser = getCurrentUser();
+      if (!currentUser) return;
 
-        // userList도 업데이트
-        const userList = JSON.parse(localStorage.getItem('userList')) || [];
-        const idx = userList.findIndex(u => u.userId === currentUser.userId);
-        if (idx !== -1) {
-          userList[idx] = currentUser;
-          localStorage.setItem('userList', JSON.stringify(userList));
-        }
+      try {
+        const response = await window.apiClient.updateUserApi(currentUser.id, {
+          allergies: [],
+          ingredients: [],
+        });
+        localStorage.setItem('currentUser', JSON.stringify(response.user));
+        alert('데이터가 초기화되었습니다.');
+        location.reload();
+      } catch (err) {
+        console.error(err);
+        alert('데이터를 초기화하지 못했습니다.');
       }
-
-      alert('데이터가 초기화되었습니다.');
-      location.reload();
     });
   }
 
