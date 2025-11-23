@@ -1,0 +1,6 @@
+# Favorites Persistence Issue — Hypotheses
+
+1. **Supabase role/permissions may block inserts**: All Supabase calls use the single `SUPABASE_KEY` for both `apikey` and `Authorization` headers. If the configured key is an anon/public key without row-level policies permitting `INSERT`/`DELETE` on the `favorites` table, requests would succeed for reads but fail silently for writes, preventing rows from persisting.
+2. **Missing explicit `id` value could violate a NOT NULL constraint**: The favorites API inserts only `user_id`, `recipe_id`, and `created_at` without supplying an `id`. If the `favorites.id` column is defined without a default (no sequence/UUID) the insert would raise a constraint error and skip persistence.
+3. **Delete-before-insert flow might discard the only record on transient failures**: `addFavorite` unconditionally issues a DELETE before inserting. If the subsequent POST fails (network hiccup, Supabase rejection), the favorite is removed and not re-created, leaving the UI thinking it toggled but the database empty.
+4. **Request validation requires both `userId` and `recipeId`**: Any call that omits either value throws a 400 before hitting Supabase. If the frontend ever calls the endpoint without a persisted `user.id` (e.g., due to a stale session object), the UI toast would fire but no DB change would occur.
