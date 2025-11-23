@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>맛있는 코드 - 마이페이지</title>
+  
+  <link rel="stylesheet" href="/css/page.css" />
+  <link rel="stylesheet" href="/css/mypage.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-white">
+<header class="common-header">
+  <div class="header-container">
+    <div class="header-top">
+      <button id="authBtn" class="header-link" type="button">로그인 / 회원가입</button>
+    </div>
+    <div class="header-main">
+      <div class="logo" onclick="location.href='/index.html'">
+        <img src="/img/icons/logo.png" alt="맛있는 코드" class="logo-image" />
+      </div>
+      
+      <div class="search-container">
+        <input 
+          id="headerSearchInput" 
+          type="search" 
+          placeholder="검색어를 입력하세요"
+          class="search-input"
+        />
+        <img
+          id="headerSearchIcon"
+          src="/img/icons/search.png"
+          alt="검색"
+          onclick="handleSearch()"
+          class="search-icon"
+        />
+      </div>
+      
+      <nav class="nav-menu">
+        <button class="nav-button" onclick="location.href='/recipe_all.html'">레시피</button>
+        <div class="nav-divider"></div>
+        <button class="nav-button" onclick="location.href='/myplus.html'">재료등록</button>
+      </nav>
+      
+      <div class="header-icons">
+        <img
+          src="/img/icons/mypage.png"
+          alt="마이페이지"
+          onclick="location.href='/mypage.html'"
+          class="icon-image"
+        />
+        <img
+          src="/img/icons/bookmark.png"
+          alt="북마크"
+          onclick="location.href='/my_fav.html'"
+          class="icon-image"
+        />
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  function handleSearch() {
+    const searchInput = document.getElementById('headerSearchInput');
+    const query = searchInput.value.trim();
+
+    if (query === '') {
+      location.href = '/recipe_search.html';
+    } else {
+      // localStorage에 검색어 저장
+      let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+      recentSearches = recentSearches.filter(term => term !== query);
+      recentSearches.unshift(query);
+      if (recentSearches.length > 10) {
+        recentSearches = recentSearches.slice(0, 10);
+      }
+      localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+      
+      const ingredients = query.replace(/\s+/g, ',');
+      location.href = `recipe_results.html?ingredients=${encodeURIComponent(ingredients)}`;
+    }
+  }
+</script>
+
+<main class="mypage-main">
+
+  <div class="title-group">
+    <h1 class="title">마이페이지</h1>
+  </div>
+
+  <section class="content">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="card profile-card">
+        <p class="username">홍길동님!</p>
+        <p class="greeting">오늘도 맛있는 하루 되세요! 🍳</p>
+        <a href="/my_edit.html" class="profile-btn">
+          <img src="/img/icons/setting.png" alt="환경 아이콘" />
+          <span>프로필 설정</span>
+        </a>
+      </div>
+
+      <!-- 알레르기 카드 -->
+      <div class="card allergy-card">
+        <div class="card-header">
+          <div class="title">
+            <img src="/img/icons/warning.png" alt="" />
+            알레르기 정보
+          </div>
+          <a href="/my_edit.html" class="edit-btn">
+            <img src="/img/icons/change.png" alt="수정 아이콘" />
+            <span>수정</span>
+          </a>
+        </div>
+        <div class="tags"></div>
+        <p class="note">위 재료가 포함된 레시피는 제외됩니다</p>
+      </div>
+
+      <!-- 선호 카테고리 카드 -->
+      <div class="card category-card">
+        <div class="card-header">
+          <div class="title">
+            <img src="/img/icons/heart.png" alt="" />
+            선호 음식 카테고리
+          </div>
+          <a href="/my_edit.html" class="edit-btn">
+            <img src="/img/icons/change.png" alt="수정 아이콘" />
+            <span>수정</span>
+          </a>
+        </div>
+        <div class="tags"></div>
+        <p class="note">선택한 카테고리의 레시피를 우선 추천합니다</p>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="card recipe-card">
+        <div class="card-header">
+          <div class="title">
+            <img src="/img/icons/heart.png" alt="" />
+            레시피 즐겨찾기
+          </div>
+          <a href="/my_fav.html" class="view-all-btn">전체보기 ></a>
+        </div>
+
+        <div class="recipes" id="recipeContainer"></div>
+      </div>
+
+      <div class="card ingredients-card">
+        <div class="card-header">
+          <div class="title">
+            <img src="/img/icons/apple.png" alt="" />
+            보유 중인 재료
+          </div>
+          <a href="/myplus.html" class="add-btn">
+            <img src="/img/icons/plus.png" alt="추가 아이콘" />
+            <span>재료 추가</span>
+          </a>
+        </div>
+
+        <div class="ingredients"></div>
+
+      </div>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer class="footer">
+  <div class="divider-line"></div>
+  <div class="footer-content">
+    <div class="footer-top">
+      <div class="logo">
+        <img src="/img/icons/logo.png" alt="맛있는 코드 로고" />
+      </div>
+      <nav>
+        <button>개인정보처리방침</button>
+        <div class="divider"></div>
+        <button>이용약관</button>
+        <div class="divider"></div>
+        <button>고객센터</button>
+      </nav>
+    </div>
+
+    <div class="divider-line"></div>
+
+    <div class="footer-bottom">
+      <p>© 2025 Team 맛있는코드 | 이미지 출처: Pixabay, Дарья Яковлева, 만개의 레시피</p>
+      <p>24730006 김민서 · 23730025 이수연 · 23730022 유수연 · 24730025 이소현 · 24730003 권도연</p>
+    </div>
+  </div>
+</footer>
+
+<!-- JS -->
+<script src="/js/header.js"></script>
+<script src="/js/mypage.js"></script>
+
+</body>
+</html>

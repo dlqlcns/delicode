@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>맛있는 코드 - 즐겨찾기</title>
+  
+  <link rel="stylesheet" href="/css/page.css" />
+  <link rel="stylesheet" href="/css/recipe_res_block.css" />
+  <link rel="stylesheet" href="/css/my_fav.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-white">
+<header class="common-header">
+  <div class="header-container">
+    <div class="header-top">
+      <button id="authBtn" class="header-link" type="button">로그인 / 회원가입</button>
+    </div>
+    <div class="header-main">
+      <div class="logo" onclick="location.href='/index.html'">
+        <img src="/img/icons/logo.png" alt="맛있는 코드" class="logo-image" />
+      </div>
+      
+      <div class="search-container">
+        <input 
+          id="headerSearchInput" 
+          type="search" 
+          placeholder="검색어를 입력하세요"
+          class="search-input"
+        />
+        <img
+          id="headerSearchIcon"
+          src="/img/icons/search.png"
+          alt="검색"
+          onclick="handleSearch()"
+          class="search-icon"
+        />
+      </div>
+      
+      <nav class="nav-menu">
+        <button class="nav-button" onclick="location.href='/recipe_all.html'">레시피</button>
+        <div class="nav-divider"></div>
+        <button class="nav-button" onclick="location.href='/myplus.html'">재료등록</button>
+      </nav>
+      
+      <div class="header-icons">
+        <img
+          src="/img/icons/mypage.png"
+          alt="마이페이지"
+          onclick="location.href='/mypage.html'"
+          class="icon-image"
+        />
+        <img
+          src="/img/icons/bookmark.png"
+          alt="북마크"
+          onclick="location.href='/my_fav.html'"
+          class="icon-image"
+        />
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  function handleSearch() {
+    const searchInput = document.getElementById('headerSearchInput');
+    const query = searchInput.value.trim();
+
+    if (query === '') {
+      location.href = 'recipe_search.html';
+    } else {
+      const ingredients = query.replace(/\s+/g, ',');
+      location.href = `recipe_results.html?ingredients=${encodeURIComponent(ingredients)}`;
+    }
+  }
+</script>
+
+<main class="my_fav-main">
+  <div class="my_fav-header">
+    <h1 id="resultsTitle" class="my_fav-title">레시피 즐겨찾기</h1>
+    <p id="resultsSubtitle" class="my_fav-subtitle">저장한 레시피를 관리하고 확인하세요.</p>
+
+    <div class="search-and-filter">
+      <div class="search-containerr">
+        <input 
+          id="favSearchInput"
+          type="search" 
+          placeholder="레시피 이름이나 설명으로 검색..."
+          class="search-input"
+        />
+        <img
+          id="favSearchIcon"
+          src="/img/icons/search.png"
+          alt="검색"
+          class="search-icon"
+        />
+      </div>
+
+      <div class="filter-sort-bar">
+        <select class="select-box" id="categorySelect">
+          <option>전체</option>
+          <option>한식</option>
+          <option>양식</option>
+          <option>일식</option>
+          <option>중식</option>
+          <option>디저트</option>
+          <option>동남아</option>
+          <option>샐러드</option>
+        </select>
+        <select class="select-box" id="sortSelect">
+          <option>최신순</option>
+          <option>이름순</option>
+          <option>조리 시간순</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <section class="recipe-list grid-view" id="recipeList"></section>
+</main>
+
+<footer class="common-footer">
+  <div class="footer-divider"></div>
+  <div class="footer-content">
+    <div class="footer-top">
+      <div class="logo footer-logo" onclick="location.href='/home_index.html'">
+        <img src="/img/icons/logo.png" alt="맛있는 코드" class="logo-image" />
+      </div>
+      <nav class="footer-nav">
+        <button class="footer-link">개인정보처리방침</button>
+        <div class="footer-nav-divider"></div>
+        <button class="footer-link">이용약관</button>
+        <div class="footer-nav-divider"></div>
+        <button class="footer-link">고객센터</button>
+      </nav>
+    </div>
+    <div class="footer-divider"></div>
+    <div class="footer-info">
+      <p>© 2025 Team 맛있는코드 | 이미지 출처: Pixabay, Дарья Яковлева, 만개의 레시피</p>
+      <p>24730006 김민서 · 23730025 이수연 · 23730022 유수연 · 24730025 이소현 · 24730003 권도연</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ✅ 공통 컴포넌트를 먼저 로드 -->
+<script src="/js/header.js"></script>
+<script src="/js/recipe_res_block.js"></script>
+<script src="/js/my_fav.js"></script>
+</body>
+</html>

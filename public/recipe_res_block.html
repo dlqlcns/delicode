@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>레시피 결과 블록</title>
+  <link rel="stylesheet" href="/css/recipe_res_block.css" />
+</head>
+<body>
+  <div class="recipe-container" id="recipeContainer">
+    <!-- JS에서 자동으로 카드가 렌더링됨 -->
+  </div>
+
+  <script src="/js/recipe_res_block.js"></script>
+
+  <script>
+    // 테스트용 데이터
+    const recipes = [
+      {
+        id: 1,
+        name: "크림 파스타",
+        image: "/img/recipe/cream_pasta.jpg",
+        time: "25분",
+        description: "부드러운 크림과 고소한 치즈가 어울리는 크림 파스타",
+        category: "양식",
+        bookmarked: false
+      },
+      {
+        id: 2,
+        name: "된장찌개",
+        image: "/img/recipe/soybean_stew.jpg",
+        time: "15분",
+        description: "깊고 구수한 맛을 살린 된장찌개 비법",
+        category: "한국 전통 음식",
+        bookmarked: true
+      }
+    ];
+
+    const container = document.getElementById("recipeContainer");
+
+    recipes.forEach(recipe => {
+      const card = createRecipeBlock(recipe);
+      container.appendChild(card);
+    });
+
+    attachBookmarkListeners(id => {
+      console.log("북마크 누름:", id);
+    });
+  </script>
+</body>
+</html>

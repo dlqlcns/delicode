@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>맛있는 코드 - 프로필 수정</title>
+  
+  <link rel="stylesheet" href="/css/page.css" />
+  <link rel="stylesheet" href="/css/my_edit.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-white">
+  <main>
+  <header class="common-header">
+    <div class="header-container">
+      <div class="header-top">
+        <!-- 로그인 상태에 따라 동적으로 변경되는 버튼 -->
+        <button id="authBtn" class="header-link" type="button">로그인 / 회원가입</button>
+      </div>
+
+      <div class="header-main">
+        <div class="logo" onclick="location.href='/index.html'">
+          <img src="/img/icons/logo.png" alt="맛있는 코드" class="logo-image" />
+        </div>
+        
+        <div class="search-container">
+          <input 
+            id="headerSearchInput" 
+            type="search" 
+            placeholder="검색어를 입력하세요"
+            class="search-input"
+          />
+          <img
+            id="headerSearchIcon"
+            src="/img/icons/search.png"
+            alt="검색"
+            onclick="handleSearch()"
+            class="search-icon"
+          />
+        </div>
+        
+        <nav class="nav-menu">
+          <button class="nav-button" onclick="location.href='/recipe_all.html'">레시피</button>
+          <div class="nav-divider"></div>
+          <button class="nav-button" onclick="location.href='/myplus.html'">재료등록</button>
+        </nav>
+        
+        <div class="header-icons">
+          <img
+            src="/img/icons/mypage.png"
+            alt="마이페이지"
+            onclick="location.href='/mypage.html'"
+            class="icon-image"
+          />
+          <img
+            src="/img/icons/bookmark.png"
+            alt="북마크"
+            onclick="location.href='/my_fav.html'"
+            class="icon-image"
+          />
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <script>
+    function handleSearch() {
+      const searchInput = document.getElementById('headerSearchInput');
+      const query = searchInput.value.trim();
+
+      if (query === '') {
+        location.href = 'recipe_search.html';
+      } else {
+        let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+        recentSearches = recentSearches.filter(term => term !== query);
+        recentSearches.unshift(query);
+        if (recentSearches.length > 10) {
+          recentSearches = recentSearches.slice(0, 10);
+        }
+        localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+        
+        const ingredients = query.replace(/\s+/g, ',');
+        location.href = `recipe_results.html?ingredients=${encodeURIComponent(ingredients)}`;
+      }
+    }
+  </script>
+
+  <!-- 페이지 메인: my-edit 레이아웃 wrapper 적용 -->
+  <main class="my-edit-main">
+    <section class="profile-section">
+      <h1>프로필 수정</h1>
+
+      <!-- 프로필 카드 -->
+      <div class="card">
+        <h2>프로필 정보</h2>
+        <div class="profile-info">
+          <div class="info-fields">
+            <div class="field">
+              <label>이름</label>
+              <input type="text" id="nameInput" value="홍길동" />
+            </div>
+            <div class="field">
+              <label>이메일</label>
+              <input type="email" id="emailInput" value="hong@example.com" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 알레르기 카드 -->
+      <div class="card">
+        <h2>알레르기 재료 설정</h2>
+        <p>알레르기가 있는 재료를 선택하시면 해당 재료가 포함된 레시피를 제외합니다.</p>
+        <div class="allergy-grid">
+          <label><input type="checkbox" value="땅콩" /> 땅콩</label>
+          <label><input type="checkbox" value="우유" /> 우유</label>
+          <label><input type="checkbox" value="계란" /> 계란</label>
+          <label><input type="checkbox" value="대두" /> 대두</label>
+          <label><input type="checkbox" value="밀" /> 밀</label>
+          <label><input type="checkbox" value="갑각류" /> 갑각류</label>
+          <label><input type="checkbox" value="생선" /> 생선</label>
+          <label><input type="checkbox" value="조개류" /> 조개류</label>
+          <label><input type="checkbox" value="견과류" /> 견과류</label>
+          <label><input type="checkbox" value="메밀" /> 메밀</label>
+          <label><input type="checkbox" value="복숭아" /> 복숭아</label>
+          <label><input type="checkbox" value="토마토" /> 토마토</label>
+        </div>
+      </div>
+
+      <!-- 요리 카테고리 카드 -->
+      <div class="card">
+        <h2>선호 요리 카테고리 설정</h2>
+        <p>선호하는 요리 카테고리를 선택하시면 맞춤형 레시피를 추천해드립니다.</p>
+
+        <div class="preference-grid">
+          <label><input type="checkbox" value="한식" /> 한식</label>
+          <label><input type="checkbox" value="중식" /> 중식</label>
+          <label><input type="checkbox" value="일식" /> 일식</label>
+          <label><input type="checkbox" value="양식" /> 양식</label>
+          <label><input type="checkbox" value="분식" /> 분식</label>
+          <label><input type="checkbox" value="디저트" /> 디저트</label>
+          <label><input type="checkbox" value="베이커리" /> 베이커리</label>
+          <label><input type="checkbox" value="샐러드" /> 샐러드</label>
+          <label><input type="checkbox" value="퓨전" /> 퓨전</label>
+          <label><input type="checkbox" value="동남아" /> 동남아</label>
+          <label><input type="checkbox" value="해산물" /> 해산물</label>
+          <label><input type="checkbox" value="비건" /> 비건</label>
+        </div>
+      </div>
+
+      <!-- 위험 영역 -->
+      <div class="card danger">
+        <div class="danger-inner">
+          <div class="icon">⚠️</div>
+          <div>
+            <h2>위험 영역</h2>
+            <p>
+              모든 설정과 저장된 데이터를 초기화합니다. 이 작업은 되돌릴 수
+              없으니 신중하게 진행해주세요.
+            </p>
+            <button class="danger-btn">데이터 초기화</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 저장 버튼 -->
+      <button class="save-btn">프로필 저장</button>
+    </section>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="common-footer">
+    <div class="footer-divider"></div>
+    <div class="footer-content">
+      <div class="footer-top">
+        <div class="logo footer-logo" onclick="location.href='/index.html'">
+          <img src="/img/icons/logo.png" alt="맛있는 코드" class="/logo-image" />
+        </div>
+        <nav class="footer-nav">
+          <button class="footer-link">개인정보처리방침</button>
+          <div class="footer-nav-divider"></div>
+          <button class="footer-link">이용약관</button>
+          <div class="footer-nav-divider"></div>
+          <button class="footer-link">고객센터</button>
+        </nav>
+      </div>
+      <div class="footer-divider"></div>
+      <div class="footer-info">
+        <p>© 2025 Team 맛있는코드 | 이미지 출처: Pixabay, Дарья Яковлева, 만개의 레시피</p>
+        <p>24730006 김민서 · 23730025 이수연 · 23730022 유수연 · 24730025 이소현 · 24730003 권도연</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 스크립트 로드 순서: header 업데이트 → my_edit 기능 -->
+  <script src="/js//header.js"></script>
+  <script src="/js/my_edit.js"></script>
+</body>
+</html>

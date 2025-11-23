@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>맛있는 코드 - 로그인</title>
+  <link rel="stylesheet" href="/css/login.css" />
+  <link href="https://fonts.googleapis.com/css?family=Nanum+Gothic:400,700,800|Roboto:400|Didact+Gothic" rel="stylesheet" />
+</head>
+<body>
+  <header class="login-header">
+    <nav class="login-nav">
+      <div class="nav-box">
+        <a href="/index.html">
+          <img src="/img/icons/logo.png" alt="맛있는 코드 로고" class="login-logo" />
+        </a>
+      </div>
+      
+      <div class="nav-right">
+         <button class="nav-btn" onclick="location.href='/recipe_all.html'">레시피</button>
+        <div class="vertical-divider"></div>
+        <button class="nav-btn" onclick="location.href='/recipe_search.html'">추천받기</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="login-main">
+    <div class="login-card">
+      <h1 class="login-title">로그인</h1>
+
+      <form class="login-form" id="loginForm"> 
+        
+        <div class="form-group">
+            <input type="text" id="userId" placeholder="아이디 또는 이메일 주소" class="input-field" />
+        </div>
+        
+        <div class="form-group">
+            <input type="password" id="password" placeholder="비밀번호" class="input-field" />
+        </div>
+        <button type="submit" class="submit-btn">로그인</button>
+
+        <div class="login-links">
+          <a href="/join.html"><button type="button">회원가입</button></a>
+          <span>|</span>
+          <a href="/find.html"><button type="button">아이디/비밀번호 찾기</button></a>
+        </div>
+
+        <div class="sns-divider">
+          <div class="line"></div>
+          <span>SNS 간편 가입</span>
+          <div class="line"></div>
+        </div>
+
+        <div class="social-buttons">
+          <button class="social-btn google" type="button">
+            <img src="/img/icons/google.png" alt="Google" />
+            <span>Google 로그인</span>
+          </button>
+
+          <button class="social-btn naver" type="button">
+            <img src="/img/icons/naver.png" alt="Naver" />
+            <span>네이버 로그인</span>
+          </button>
+
+          <button class="social-btn kakao" type="button">
+            <img src="/img/icons/kakao.png" alt="Kakao" />
+            <span>카카오 로그인</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="/js/login.js"></script>
+
+</body>
+</html>
