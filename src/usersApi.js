@@ -8,24 +8,22 @@ function sanitizeUser(user) {
 }
 
 async function checkUserExists({ username, email }) {
-  const filters = [];
-  if (username) filters.push({ field: 'username', value: username });
-  if (email) filters.push({ field: 'email', value: email });
+  const lookups = [];
 
-  if (!filters.length) return [];
-
-  const params = { select: 'id,username,email' };
-
-  if (filters.length === 1) {
-    const { field, value } = filters[0];
-    params[field] = `eq.${value}`;
-  } else {
-    const orClause = filters.map(({ field, value }) => `${field}.eq.${value}`).join(',');
-    params.or = `(${orClause})`;
+  if (username) {
+    const query = buildQuery({ select: 'id,username,email', username: `eq.${username}`, limit: 1 });
+    lookups.push(supabaseRequest(`/users${query}`));
   }
 
-  const query = buildQuery(params);
-  return supabaseRequest(`/users${query}`);
+  if (email) {
+    const query = buildQuery({ select: 'id,username,email', email: `eq.${email}`, limit: 1 });
+    lookups.push(supabaseRequest(`/users${query}`));
+  }
+
+  if (!lookups.length) return [];
+
+  const results = await Promise.all(lookups);
+  return results.flat();
 }
 
 async function registerUser(payload) {

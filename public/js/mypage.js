@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const categoryTags = document.querySelector('.category-card .tags');
   const ingredientsContainer = document.querySelector('.ingredients');
   const recipeContainer = document.getElementById('recipeContainer');
+  const guardElement = document.getElementById('mypageGuard');
+  const contentWrapper = document.getElementById('mypageContent');
 
   function getStoredUser() {
     try {
@@ -18,14 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  async function requireLogin() {
-    const stored = getStoredUser();
-    if (!stored) {
-      alert('로그인이 필요합니다.');
-      window.location.href = 'login.html';
-      throw new Error('Not authenticated');
-    }
-    return stored;
+  function showGuestView() {
+    if (contentWrapper) contentWrapper.style.display = 'none';
+    if (guardElement) guardElement.hidden = false;
+  }
+
+  function showContentView() {
+    if (contentWrapper) contentWrapper.style.display = '';
+    if (guardElement) guardElement.hidden = true;
   }
 
   function renderTags(container, values, emptyMessage, tagClass = 'tag') {
@@ -128,7 +130,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadPage() {
-    const stored = await requireLogin();
+    const stored = getStoredUser();
+    if (!stored) {
+      showGuestView();
+      return;
+    }
+
+    showContentView();
     try {
       const response = await window.apiClient.fetchUserApi(stored.id);
       if (!response?.user) throw new Error('사용자 정보를 불러오지 못했습니다.');
@@ -138,9 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
       await loadFavorites(user.id);
     } catch (err) {
       console.error(err);
-      alert('사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.');
       localStorage.removeItem('currentUser');
-      window.location.href = 'login.html';
+      showGuestView();
     }
   }
 

@@ -42,15 +42,36 @@ function renderRecipeDetail(recipe) {
         stepsContainer.innerHTML = '';
 
         if (recipe.steps && recipe.steps.length > 0) {
-            recipe.steps.forEach(step => {
+            recipe.steps.forEach((step, index) => {
+                const order = step.step_order ?? index + 1;
                 const stepItem = document.createElement('div');
-                stepItem.className = 'step-item';
+                stepItem.className = 'recipe-step-item';
 
-                stepItem.innerHTML = `
-                    <div class="step-content">
-                        <p>${step.step_description}</p>
-                    </div>
-                `;
+                const stepImage = document.createElement('div');
+                stepImage.className = 'step-image-box';
+
+                const stepContent = document.createElement('div');
+                stepContent.className = 'step-content';
+
+                const stepNumber = document.createElement('div');
+                stepNumber.className = 'step-number';
+                stepNumber.textContent = order;
+
+                const stepTitle = document.createElement('h3');
+                stepTitle.className = 'step-title';
+                stepTitle.textContent = `Step ${order}`;
+
+                const stepDescription = document.createElement('p');
+                stepDescription.className = 'step-description';
+                stepDescription.textContent = step.step_description;
+
+                stepContent.appendChild(stepNumber);
+                stepContent.appendChild(stepTitle);
+                stepContent.appendChild(stepDescription);
+
+                stepItem.appendChild(stepImage);
+                stepItem.appendChild(stepContent);
+
                 stepsContainer.appendChild(stepItem);
             });
         } else {
