@@ -1,0 +1,194 @@
+/* ============================================ */
+/* index.css - 메인 페이지 전용 */
+/* ============================================ */
+
+/* Hero Section */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 460px;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+/* ✅ hero-content: recipe_all처럼 중앙 배치 + 여백 */
+.hero-content {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  color: white;
+}
+
+.hero h1 {
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: -3px;
+}
+
+.hero h2 {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+}
+
+.hero-buttons {
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
+}
+
+.hero-buttons .primary,
+.hero-buttons .secondary {
+  height: 70px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+
+.hero-buttons .primary {
+  width: 322px;
+  background-color: #355AFF;
+  color: white;
+}
+
+.hero-buttons .primary:hover {
+  background-color: #274eff;
+}
+
+.hero-buttons .secondary {
+  width: 200px;
+  background-color: #f9f9f9;
+  color: #242424;
+}
+
+.hero-buttons .secondary:hover {
+  background-color: #e5e5e5;
+}
+
+/* ============================================ */
+/* Recipe Section - recipe_all 스타일 적용 */
+/* ============================================ */
+
+.recipes {
+  padding: 64px 0;
+  background-color: white;
+}
+
+/* ✅ 중앙 컨테이너 + 여백 (recipe_all처럼) */
+.recipes-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.recipes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.recipes-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.more-link {
+  font-size: 14px;
+  color: #666;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.more-link:hover {
+  color: #111;
+  text-decoration: underline;
+}
+
+/* ✅ 그리드: 5열 고정 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 40px;
+}
+
+/* [수정됨] index 페이지 전용 예외 처리 
+   recipe_res_block 컴포넌트를 공유하지만, 
+   index 페이지의 #recipeGrid 내부에서는 북마크 버튼을 숨김 처리합니다.
+   !important는 혹시 모를 우선순위 문제를 방지하기 위해 추가했습니다.
+*/
+#recipeGrid .bookmark-btn {
+  display: none !important;
+}
+
+/* ============================================ */
+/* 반응형 */
+/* ============================================ */
+
+@media (max-width: 768px) {
+  .hero h1 { 
+    font-size: 48px; 
+  }
+  
+  .hero h2 { 
+    font-size: 24px; 
+  }
+  
+  .hero-buttons {
+    flex-direction: column;
+  }
+  
+  .hero-buttons .primary,
+  .hero-buttons .secondary {
+    width: 100%;
+  }
+  
+  .recipes-container {
+    padding: 0 1rem;
+  }
+  
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { 
+    font-size: 32px; 
+  }
+  
+  .hero h2 { 
+    font-size: 18px; 
+  }
+  
+  .hero-content {
+    padding: 0 1rem;
+  }
+  
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
