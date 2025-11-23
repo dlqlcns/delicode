@@ -19,22 +19,36 @@ async function addFavorite(userId, recipeId) {
     throw error;
   }
 
-  const payload = [{
+  // Avoid relying on DB-side conflict constraints by checking first.
+  const existingQuery = buildQuery({
+    select: 'recipe_id',
+    user_id: `eq.${userId}`,
+    recipe_id: `eq.${recipeId}`,
+    limit: 1,
+  });
+  const existingRows = await supabaseRequest(`/favorites${existingQuery}`);
+  if (existingRows?.length) {
+    return getFavorites(userId);
+  }
+
+  const payload = {
     user_id: userId,
     recipe_id: recipeId,
     created_at: new Date().toISOString(),
-  }];
+  };
 
-  const insertQuery = buildQuery({ select: 'recipe_id', on_conflict: 'user_id,recipe_id' });
-  const inserted = await supabaseRequest(`/favorites${insertQuery}`, {
+  const inserted = await supabaseRequest('/favorites', {
     method: 'POST',
     body: payload,
-    prefer: 'resolution=merge-duplicates,return=representation',
+    prefer: 'return=representation',
   });
 
-  const savedRecipeId = inserted?.[0]?.recipe_id ?? inserted?.find?.(row => row?.recipe_id)?.recipe_id;
+  const savedRecipeId = Array.isArray(inserted)
+    ? inserted[0]?.recipe_id
+    : inserted?.recipe_id;
+
   if (!savedRecipeId) {
-    // Retry fetch to confirm whether an existing row already satisfied the merge behavior
+    // Confirm persistence when the insert response is empty.
     const refreshed = await getFavorites(userId);
     if (!refreshed.includes(recipeId)) {
       const error = new Error('Favorite could not be saved');
