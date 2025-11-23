@@ -9,10 +9,22 @@ function sanitizeUser(user) {
 
 async function checkUserExists({ username, email }) {
   const filters = [];
-  if (username) filters.push(`username.eq.${username}`);
-  if (email) filters.push(`email.eq.${email}`);
+  if (username) filters.push({ field: 'username', value: username });
+  if (email) filters.push({ field: 'email', value: email });
+
   if (!filters.length) return [];
-  const query = buildQuery({ select: 'id,username,email', or: `(${filters.join(',')})` });
+
+  const params = { select: 'id,username,email' };
+
+  if (filters.length === 1) {
+    const { field, value } = filters[0];
+    params[field] = `eq.${value}`;
+  } else {
+    const orClause = filters.map(({ field, value }) => `${field}.eq.${value}`).join(',');
+    params.or = `(${orClause})`;
+  }
+
+  const query = buildQuery(params);
   return supabaseRequest(`/users${query}`);
 }
 

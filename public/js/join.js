@@ -78,11 +78,11 @@ function validatePasswordMatch() {
 async function checkAvailability({ username, email }) {
     try {
         const response = await window.apiClient.checkAvailabilityApi({ username, email });
-        return response.available;
+        return { available: response.available };
     } catch (err) {
         console.error(err);
-        alert('중복 확인 중 오류가 발생했습니다.');
-        return false;
+        alert('중복 확인 중 오류가 발생했습니다. 다시 시도해주세요.');
+        return { available: null };
     }
 }
 
@@ -93,7 +93,8 @@ if (idCheckBtn) {
             alert('아이디를 올바르게 입력해주세요.');
             return;
         }
-        const available = await checkAvailability({ username });
+        const { available } = await checkAvailability({ username });
+        if (available === null) return;
         alert(available ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.');
     });
 }
@@ -105,7 +106,8 @@ if (emailCheckBtn) {
             alert('이메일을 올바르게 입력해주세요.');
             return;
         }
-        const available = await checkAvailability({ email });
+        const { available } = await checkAvailability({ email });
+        if (available === null) return;
         alert(available ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.');
     });
 }

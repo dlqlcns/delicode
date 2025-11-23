@@ -47,9 +47,7 @@ function renderRecipeDetail(recipe) {
                 stepItem.className = 'step-item';
 
                 stepItem.innerHTML = `
-                    <div class="step-number">${step.step_order}</div>
                     <div class="step-content">
-                        <h4>단계 ${step.step_order}</h4>
                         <p>${step.step_description}</p>
                     </div>
                 `;

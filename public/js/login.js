@@ -14,8 +14,16 @@ async function handleLogin(event) {
 
     try {
         const response = await window.apiClient.loginUserApi({ identifier, password });
-        const fresh = await window.apiClient.fetchUserApi(response.user.id);
-        localStorage.setItem('currentUser', JSON.stringify(fresh.user));
+        let user = response.user;
+
+        try {
+            const fresh = await window.apiClient.fetchUserApi(response.user.id);
+            if (fresh?.user) user = fresh.user;
+        } catch (err) {
+            console.warn('사용자 세부 정보를 다시 불러오지 못했습니다. 로그인 응답 데이터를 사용합니다.', err);
+        }
+
+        localStorage.setItem('currentUser', JSON.stringify(user));
         alert('로그인에 성공했습니다.');
         window.location.href = 'index.html';
     } catch (err) {

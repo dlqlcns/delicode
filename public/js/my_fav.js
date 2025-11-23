@@ -26,7 +26,8 @@ function getCurrentUser() {
 async function loadFavorites() {
   const user = getCurrentUser();
   if (!user) {
-    showLoginRequestNotification();
+    alert('로그인이 필요합니다.');
+    window.location.href = 'login.html';
     return;
   }
 
@@ -61,6 +62,13 @@ async function loadFavorites() {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    const user = getCurrentUser();
+    if (!user) {
+        alert('로그인이 필요합니다.');
+        window.location.href = 'login.html';
+        return;
+    }
+
     loadFavorites(); // 초기 로드
 
     // 헤더 검색 (headerSearchInput)
