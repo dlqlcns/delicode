@@ -12,6 +12,7 @@ const REST_URL = `${SUPABASE_URL.replace(/\/$/, '')}/rest/v1`;
 const defaultHeaders = {
   apikey: SUPABASE_KEY,
   Authorization: `Bearer ${SUPABASE_KEY}`,
+  Accept: 'application/json',
 };
 
 async function supabaseRequest(path, { method = 'GET', body, headers = {}, prefer } = {}) {

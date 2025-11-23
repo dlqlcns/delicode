@@ -1,76 +1,86 @@
 import { buildQuery, supabaseRequest } from './supabaseClient.js';
 
-async function getFavorites(userId) {
-  if (!userId) {
-    const error = new Error('userId is required');
+function toNumber(value, field) {
+  const num = Number(value);
+  if (!Number.isFinite(num)) {
+    const error = new Error(`${field} is required`);
     error.status = 400;
     throw error;
   }
+  return num;
+}
 
-  const query = buildQuery({ select: 'recipe_id', user_id: `eq.${userId}` });
-  const rows = await supabaseRequest(`/favorites${query}`);
-  return rows.map(row => row.recipe_id);
+function parseSupabaseError(error) {
+  const friendly = new Error(error?.message || 'Supabase request failed');
+  friendly.status = error?.status || 500;
+  return friendly;
+}
+
+async function getFavorites(userId) {
+  const uid = toNumber(userId, 'userId');
+  const query = buildQuery({ select: 'recipe_id', user_id: `eq.${uid}` });
+  try {
+    const rows = await supabaseRequest(`/favorites${query}`);
+    return (rows || []).map(row => row.recipe_id);
+  } catch (err) {
+    throw parseSupabaseError(err);
+  }
 }
 
 async function addFavorite(userId, recipeId) {
-  if (!userId || !recipeId) {
-    const error = new Error('userId and recipeId are required');
-    error.status = 400;
-    throw error;
-  }
+  const uid = toNumber(userId, 'userId');
+  const rid = toNumber(recipeId, 'recipeId');
 
-  // Avoid relying on DB-side conflict constraints by checking first.
-  const existingQuery = buildQuery({
-    select: 'recipe_id',
-    user_id: `eq.${userId}`,
-    recipe_id: `eq.${recipeId}`,
-    limit: 1,
-  });
-  const existingRows = await supabaseRequest(`/favorites${existingQuery}`);
-  if (existingRows?.length) {
-    return getFavorites(userId);
-  }
-
-  const payload = {
-    user_id: userId,
-    recipe_id: recipeId,
-    created_at: new Date().toISOString(),
-  };
-
-  const inserted = await supabaseRequest('/favorites', {
-    method: 'POST',
-    body: payload,
-    prefer: 'return=representation',
+  const conflictQuery = buildQuery({
+    on_conflict: 'user_id,recipe_id',
+    select: 'id,recipe_id,user_id',
   });
 
-  const savedRecipeId = Array.isArray(inserted)
-    ? inserted[0]?.recipe_id
-    : inserted?.recipe_id;
+  try {
+    const inserted = await supabaseRequest(`/favorites${conflictQuery}`, {
+      method: 'POST',
+      body: {
+        user_id: uid,
+        recipe_id: rid,
+        created_at: new Date().toISOString(),
+      },
+      prefer: 'resolution=merge-duplicates,return=representation',
+    });
 
-  if (!savedRecipeId) {
-    // Confirm persistence when the insert response is empty.
-    const refreshed = await getFavorites(userId);
-    if (!refreshed.includes(recipeId)) {
-      const error = new Error('Favorite could not be saved');
-      error.status = 500;
-      throw error;
+    const savedRecipeId = Array.isArray(inserted) ? inserted[0]?.recipe_id : inserted?.recipe_id;
+    if (!savedRecipeId) {
+      // Fallback select in case representation is empty for duplicates
+      const validationQuery = buildQuery({
+        select: 'recipe_id',
+        user_id: `eq.${uid}`,
+        recipe_id: `eq.${rid}`,
+        limit: 1,
+      });
+      const rows = await supabaseRequest(`/favorites${validationQuery}`);
+      if (!rows?.length) {
+        const error = new Error('Favorite could not be saved');
+        error.status = 500;
+        throw error;
+      }
     }
-    return refreshed;
-  }
 
-  return getFavorites(userId);
+    return getFavorites(uid);
+  } catch (err) {
+    throw parseSupabaseError(err);
+  }
 }
 
 async function removeFavorite(userId, recipeId) {
-  if (!userId || !recipeId) {
-    const error = new Error('userId and recipeId are required');
-    error.status = 400;
-    throw error;
-  }
+  const uid = toNumber(userId, 'userId');
+  const rid = toNumber(recipeId, 'recipeId');
+  const deleteQuery = buildQuery({ user_id: `eq.${uid}`, recipe_id: `eq.${rid}` });
 
-  const query = buildQuery({ user_id: `eq.${userId}`, recipe_id: `eq.${recipeId}` });
-  await supabaseRequest(`/favorites${query}`, { method: 'DELETE' });
-  return getFavorites(userId);
+  try {
+    await supabaseRequest(`/favorites${deleteQuery}`, { method: 'DELETE' });
+    return getFavorites(uid);
+  } catch (err) {
+    throw parseSupabaseError(err);
+  }
 }
 
 export { getFavorites, addFavorite, removeFavorite };
