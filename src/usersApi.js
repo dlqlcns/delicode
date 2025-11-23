@@ -4,7 +4,11 @@ import { hashPassword, verifyPassword } from './password.js';
 function sanitizeUser(user) {
   if (!user) return null;
   const { password_hash, ...safe } = user;
-  return safe;
+  return {
+    ...safe,
+    allergies: Array.isArray(safe.allergies) ? safe.allergies : [],
+    ingredients: Array.isArray(safe.ingredients) ? safe.ingredients : [],
+  };
 }
 
 async function checkUserExists({ username, email, excludeId }) {
@@ -52,7 +56,13 @@ async function registerUser(payload) {
   }
 
   const password_hash = hashPassword(password);
-  const insertBody = [{ username, email, password_hash, allergies, ingredients }];
+  const insertBody = [{
+    username,
+    email,
+    password_hash,
+    allergies: Array.isArray(allergies) ? allergies : [],
+    ingredients: Array.isArray(ingredients) ? ingredients : [],
+  }];
   const data = await supabaseRequest('/users', {
     method: 'POST',
     body: insertBody,
@@ -105,7 +115,11 @@ async function updateUser(id, payload) {
   const updates = {};
   allowedFields.forEach(field => {
     if (payload[field] !== undefined) {
-      updates[field] = payload[field];
+      if (field === 'allergies' || field === 'ingredients') {
+        updates[field] = Array.isArray(payload[field]) ? payload[field] : [];
+      } else {
+        updates[field] = payload[field];
+      }
     }
   });
 

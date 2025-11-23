@@ -48,6 +48,17 @@ async function handleBookmarkClick(id, isActive) {
     favoriteIds = new Set(response.favorites || []);
     recipes = recipes.map(r => ({ ...r, bookmarked: favoriteIds.has(r.id) }));
     renderRecipeCards();
+
+    const target = recipes.find(r => r.id === id);
+    if (favoriteIds.has(id)) {
+      showToastNotification(
+        `${target?.name || '레시피'}가 즐겨찾기에 추가되었습니다.`,
+        '즐겨찾기 보기',
+        () => { window.location.href = 'my_fav.html'; },
+      );
+    } else {
+      showToastNotification(`${target?.name || '레시피'} 즐겨찾기를 해제했습니다.`);
+    }
   } catch (err) {
     console.error(err);
     throw err;

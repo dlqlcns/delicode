@@ -200,6 +200,17 @@ async function toggleBookmark(id, isActive) {
       recipe.bookmarked = favoriteIds.has(recipe.id);
     });
     renderRecipes(currentRecipes);
+
+    const target = currentRecipes.find(r => r.id === id);
+    if (favoriteIds.has(id)) {
+      showToastNotification(
+        `${target?.name || '레시피'}가 즐겨찾기에 추가되었습니다.`,
+        '즐겨찾기 보기',
+        () => { window.location.href = 'my_fav.html'; },
+      );
+    } else {
+      showToastNotification(`${target?.name || '레시피'} 즐겨찾기를 해제했습니다.`);
+    }
   } catch (err) {
     console.error(err);
     throw err;
@@ -212,6 +223,10 @@ async function loadResults() {
   const ingredientsParam = params.get('ingredients') || '';
   const categoryParam = params.get('category') || '';
   const excludeParam = params.get('exclude') || '';
+
+  if (categorySelect && categoryParam) {
+    categorySelect.value = categoryParam;
+  }
 
   displayTags(params);
 
