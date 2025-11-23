@@ -1,14 +1,18 @@
 // myplus.js
 
-// 로컬 스토리지 키
-const STORAGE_KEY = 'userIngredients';
-
 // 요소 가져오기
 const input = document.querySelector(".add-row .input"); // 입력창
 const select = document.querySelector(".add-row .select"); // 카테고리 선택
 const addBtn = document.querySelector(".btn-add"); // 추가 버튼
 const saveBtn = document.querySelector(".btn-save"); // 저장 버튼
 const ingredientSection = document.querySelector(".ingredient-section"); // 재료 카테고리 묶음
+
+function requireApiClient() {
+    if (!window.apiClient) {
+        alert('데이터 모듈을 불러오지 못했습니다. 페이지를 새로고침한 후 다시 시도해주세요.');
+        throw new Error('apiClient not available');
+    }
+}
 
 // ✅ 수정된 카테고리 목록
 const CATEGORIES = ['전체', '채소류', '육류', '유제품', '곡물류', '기타'];
@@ -99,86 +103,89 @@ function addIngredient(name, categoryName) {
     return true; // 추가 성공
 }
 
-// ✅ 재료 정보를 로컬 스토리지에 저장 (mypage 연동 추가)
-function saveIngredients() {
-    const data = {};
-    const categoriesOnScreen = document.querySelectorAll('.ingredient-section .category');
-    
+// ✅ 재료 정보를 서버에 저장
+  async function saveIngredients() {
+      requireApiClient();
+      const categoriesOnScreen = document.querySelectorAll('.ingredient-section .category');
+    const items = [];
+
     categoriesOnScreen.forEach(categoryEl => {
         const categoryName = categoryEl.getAttribute('data-category');
         const badges = categoryEl.querySelectorAll('.badge');
-        
-        const ingredients = Array.from(badges).map(badge => {
-            // 뱃지 텍스트에서 닫기 버튼 텍스트(×)를 제외하고 재료 이름만 추출
-            return badge.textContent.replace('×', '').trim();
+
+        badges.forEach(badge => {
+            const ingredientName = badge.textContent.replace('×', '').trim();
+            if (ingredientName) {
+                items.push({ ingredient: ingredientName, category: categoryName });
+            }
         });
-        
-        if (ingredients.length > 0) {
-            data[categoryName] = ingredients;
-        }
     });
 
-    // localStorage에 저장
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    
-    // currentUser에도 저장 (mypage 연동)
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser) {
-        currentUser.ingredients = data;
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // userList도 업데이트
-        const userList = JSON.parse(localStorage.getItem('userList')) || [];
-        const idx = userList.findIndex(u => u.userId === currentUser.userId);
-        if (idx !== -1) {
-            userList[idx] = currentUser;
-            localStorage.setItem('userList', JSON.stringify(userList));
-        }
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        window.location.href = 'login.html';
+        return;
     }
-    
-    alert('보유 재료 목록이 저장되었습니다.');
-    
-    // 저장 성공 후 mypage로 이동
-    window.location.href = 'mypage.html';
+
+    try {
+        await window.apiClient.saveUserIngredientsApi(currentUser.id, items);
+        alert('보유 재료 목록이 저장되었습니다.');
+        window.location.href = 'mypage.html';
+    } catch (err) {
+        console.error(err);
+        alert('재료 정보를 저장하지 못했습니다. 다시 시도해주세요.');
+    }
 }
 
-// ✅ 로컬 스토리지에서 재료를 로드하여 화면에 표시 (currentUser 우선)
-function loadIngredients() {
-    // 1. 카테고리 select 옵션 생성
-    createCategoryOptions();
+// ✅ 서버에서 재료를 로드하여 화면에 표시
+  async function loadIngredients() {
+      createCategoryOptions();
 
-    // 2. currentUser에서 먼저 로드 시도
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    let ingredients = {};
-    
-    if (currentUser && currentUser.ingredients) {
-        ingredients = currentUser.ingredients;
-    } else {
-        // currentUser에 없으면 기존 STORAGE_KEY에서 로드
-        const savedData = localStorage.getItem(STORAGE_KEY);
-        ingredients = savedData ? JSON.parse(savedData) : {};
+      requireApiClient();
+
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        window.location.href = 'login.html';
+        return;
     }
 
-    // 3. 화면 초기화 (모든 카테고리 영역 제거)
-    ingredientSection.innerHTML = ''; 
+    ingredientSection.innerHTML = '';
 
-    // 4. 저장된 재료 렌더링
-    for (const category in ingredients) {
-        if (ingredients[category] && ingredients[category].length > 0) {
-            const target = getOrCreateCategoryElement(category); // 카테고리 영역 동적 생성
-            const wrap = target.querySelector(".badge-wrap");
-            
-            ingredients[category].forEach(name => {
-                const badge = document.createElement("div");
-                badge.className = "badge"; 
-                badge.innerHTML = `${name} <button class="badge-close" type="button">×</button>`;
-                wrap.appendChild(badge);
-            });
+    try {
+        const response = await window.apiClient.fetchUserIngredientsApi(currentUser.id);
+        const ingredientsByCategory = {};
+
+        (response.ingredients || []).forEach(item => {
+            const categoryName = item.category || '기타';
+            if (!ingredientsByCategory[categoryName]) {
+                ingredientsByCategory[categoryName] = [];
+            }
+            ingredientsByCategory[categoryName].push(item.ingredient);
+        });
+
+        for (const category in ingredientsByCategory) {
+            if (ingredientsByCategory[category].length > 0) {
+                const target = getOrCreateCategoryElement(category);
+                const wrap = target.querySelector(".badge-wrap");
+
+                ingredientsByCategory[category].forEach(name => {
+                    const badge = document.createElement("div");
+                    badge.className = "badge";
+                    badge.innerHTML = `${name} <button class="badge-close" type="button">×</button>`;
+                    wrap.appendChild(badge);
+                });
+            }
         }
+
+        updateCount();
+    } catch (err) {
+        console.error(err);
+        // 빈 목록인 경우에도 세션이 끊기지 않도록 화면만 업데이트
+        ingredientSection.innerHTML = '<p class="ingredient-empty">등록된 재료가 없습니다. 추가해보세요.</p>';
+        updateCount();
     }
-    
-    // 5. 재료 수 업데이트 (저장된 재료가 없으면 총 0개로 표시되고 화면은 비어 있음)
-    updateCount();
 }
 
 // ==========================================================

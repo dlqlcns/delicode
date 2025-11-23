@@ -86,6 +86,12 @@
 
 <main class="mypage-main">
 
+  <div id="mypageGuard" class="guest-guard" hidden>
+    <p>로그인이 필요한 페이지입니다.</p>
+    <button class="guest-login-btn" onclick="location.href='/login.html'">로그인하기</button>
+  </div>
+
+  <div id="mypageContent">
   <div class="title-group">
     <h1 class="title">마이페이지</h1>
   </div>
@@ -167,7 +173,7 @@
       </div>
     </div>
   </section>
-</div>
+  </div>
 </main>
 
 <footer class="footer">
@@ -196,6 +202,7 @@
 </footer>
 
 <!-- JS -->
+<script src="/js/apiClient.js"></script>
 <script src="/js/header.js"></script>
 <script src="/js/mypage.js"></script>
 

@@ -130,7 +130,7 @@
 .card-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 40px;
+  gap: 24px;
 }
 
 /* [수정됨] index 페이지 전용 예외 처리 
