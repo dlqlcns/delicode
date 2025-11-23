@@ -7,16 +7,26 @@ function sanitizeUser(user) {
   return safe;
 }
 
-async function checkUserExists({ username, email }) {
+async function checkUserExists({ username, email, excludeId }) {
   const lookups = [];
 
   if (username) {
-    const query = buildQuery({ select: 'id,username,email', username: `eq.${username}`, limit: 1 });
+    const query = buildQuery({
+      select: 'id,username,email',
+      username: `eq.${username}`,
+      id: excludeId ? `neq.${excludeId}` : undefined,
+      limit: 1,
+    });
     lookups.push(supabaseRequest(`/users${query}`));
   }
 
   if (email) {
-    const query = buildQuery({ select: 'id,username,email', email: `eq.${email}`, limit: 1 });
+    const query = buildQuery({
+      select: 'id,username,email',
+      email: `eq.${email}`,
+      id: excludeId ? `neq.${excludeId}` : undefined,
+      limit: 1,
+    });
     lookups.push(supabaseRequest(`/users${query}`));
   }
 
@@ -98,6 +108,19 @@ async function updateUser(id, payload) {
       updates[field] = payload[field];
     }
   });
+
+  if (updates.username || updates.email) {
+    const conflicts = await checkUserExists({
+      username: updates.username,
+      email: updates.email,
+      excludeId: id,
+    });
+    if (conflicts.length > 0) {
+      const error = new Error('Username or email already in use');
+      error.status = 409;
+      throw error;
+    }
+  }
 
   if (Object.keys(updates).length === 0) {
     const error = new Error('No updatable fields provided');

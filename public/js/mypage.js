@@ -65,25 +65,25 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    values.forEach(name => {
+    values.forEach(item => {
       const ingredientDiv = document.createElement('div');
       ingredientDiv.className = 'ingredient';
       ingredientDiv.innerHTML = `
-        <span class="name">${name}</span>
-        <span class="badge" style="background: #f3f4f6; color: #6b7280;">재료</span>
+        <span class="name">${item.ingredient}</span>
+        <span class="badge" style="background: #f3f4f6; color: #6b7280;">${item.category || '재료'}</span>
       `;
       ingredientsContainer.appendChild(ingredientDiv);
     });
   }
 
-  function renderUser(user) {
+  function renderUser(user, ownedIngredients = []) {
     if (usernameElement) {
       usernameElement.textContent = `${user.username}님!`;
     }
 
     renderTags(allergyTags, user.allergies || [], '설정된 알레르기가 없습니다.');
     renderTags(categoryTags, user.ingredients || [], '설정된 선호 카테고리가 없습니다.', 'category-tag');
-    renderIngredients(user.ingredients || []);
+    renderIngredients(ownedIngredients);
   }
 
   function renderFavoritePreview(recipes = []) {
@@ -142,7 +142,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response?.user) throw new Error('사용자 정보를 불러오지 못했습니다.');
       const user = response.user;
       localStorage.setItem('currentUser', JSON.stringify(user));
-      renderUser(user);
+
+      const ingredientsResponse = await window.apiClient.fetchUserIngredientsApi(user.id);
+      const ownedIngredients = ingredientsResponse.ingredients || [];
+
+      renderUser(user, ownedIngredients);
       await loadFavorites(user.id);
     } catch (err) {
       console.error(err);

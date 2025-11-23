@@ -47,8 +47,22 @@ async function checkAvailabilityApi(params = {}) {
   const query = new URLSearchParams();
   if (params.username) query.set('username', params.username);
   if (params.email) query.set('email', params.email);
+  if (params.excludeId) query.set('excludeId', params.excludeId);
   const suffix = query.toString();
   return apiRequest(`/api/users/check${suffix ? `?${suffix}` : ''}`);
+}
+
+async function fetchUserIngredientsApi(userId) {
+  if (!userId) return { ingredients: [] };
+  return apiRequest(`/api/users/${encodeURIComponent(userId)}/ingredients`);
+}
+
+async function saveUserIngredientsApi(userId, items) {
+  if (!userId) throw new Error('userId is required');
+  return apiRequest(`/api/users/${encodeURIComponent(userId)}/ingredients`, {
+    method: 'PUT',
+    body: { items },
+  });
 }
 
 async function fetchFavorites(userId) {
@@ -96,5 +110,7 @@ window.apiClient = {
   removeFavoriteApi,
   updateUserApi,
   fetchUserApi,
+  fetchUserIngredientsApi,
+  saveUserIngredientsApi,
   normalizeRecipeForCards,
 };

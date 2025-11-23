@@ -5,6 +5,7 @@ import { sendJson, sendError, parseJsonBody, serveStatic, setCorsHeaders } from 
 import { getRecipes, getRecipeDetail } from './recipesApi.js';
 import { registerUser, loginUser, checkUserExists, getUser, updateUser } from './usersApi.js';
 import { addFavorite, getFavorites, removeFavorite } from './favoritesApi.js';
+import { getUserIngredients, replaceUserIngredients } from './userIngredientsApi.js';
 
 const PORT = process.env.PORT || 3000;
 const publicDir = path.join(process.cwd(), 'public');
@@ -78,7 +79,49 @@ async function handleUsers(req, res, url) {
     }
   }
 
+  if (req.method === 'GET' && url.pathname === '/api/users/check') {
+    const username = url.searchParams.get('username') || '';
+    const email = url.searchParams.get('email') || '';
+    const excludeId = url.searchParams.get('excludeId') || '';
+    try {
+      const matches = await checkUserExists({ username, email, excludeId });
+      return sendJson(res, 200, { available: matches.length === 0 });
+    } catch (err) {
+      const status = err.status || 500;
+      return sendError(res, status, err.message || 'Failed to check availability');
+    }
+  }
+
   const userMatch = url.pathname.match(/^\/api\/users\/([^/]+)$/);
+  const ingredientsMatch = url.pathname.match(/^\/api\/users\/([^/]+)\/ingredients$/);
+
+  if (ingredientsMatch) {
+    const userId = decodeURIComponent(ingredientsMatch[1]);
+
+    if (req.method === 'GET') {
+      try {
+        const ingredients = await getUserIngredients(userId);
+        return sendJson(res, 200, { ingredients });
+      } catch (err) {
+        const status = err.status || 500;
+        return sendError(res, status, err.message || 'Failed to fetch ingredients');
+      }
+    }
+
+    if (req.method === 'PUT') {
+      try {
+        const body = await parseJsonBody(req);
+        const items = Array.isArray(body.items) ? body.items : [];
+        const ingredients = await replaceUserIngredients(userId, items);
+        return sendJson(res, 200, { ingredients });
+      } catch (err) {
+        const status = err.status || 500;
+        return sendError(res, status, err.message || 'Failed to save ingredients');
+      }
+    }
+
+    return notFound(res);
+  }
 
   if (req.method === 'GET' && userMatch) {
     const id = decodeURIComponent(userMatch[1]);
@@ -101,18 +144,6 @@ async function handleUsers(req, res, url) {
     } catch (err) {
       const status = err.status || 500;
       return sendError(res, status, err.message || 'Failed to update user');
-    }
-  }
-
-  if (req.method === 'GET' && url.pathname === '/api/users/check') {
-    const username = url.searchParams.get('username') || '';
-    const email = url.searchParams.get('email') || '';
-    try {
-      const matches = await checkUserExists({ username, email });
-      return sendJson(res, 200, { available: matches.length === 0 });
-    } catch (err) {
-      const status = err.status || 500;
-      return sendError(res, status, err.message || 'Failed to check availability');
     }
   }
 
