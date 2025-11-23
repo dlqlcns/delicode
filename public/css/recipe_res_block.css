@@ -13,10 +13,11 @@
   width: 100%;
 }
 
-/* .recipe-res-block:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-} */
+.recipe-res-block:hover,
+.recipe-res-block:focus-within {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
+}
 
 /* 카드 클릭 영역 */
 .recipe-link {

@@ -6,11 +6,17 @@ function createRecipeBlock(recipe) {
   const block = document.createElement('article');
   block.className = 'recipe-res-block';
 
+  const safeName = (recipe.name || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
   block.innerHTML = `
-    <button class="bookmark-btn ${recipe.bookmarked ? 'active' : ''}" 
-            data-bookmark-id="${recipe.id}" aria-label="북마크">
-      ${recipe.bookmarked ? '♥' : '♡'}
-    </button>
+      <button class="bookmark-btn ${recipe.bookmarked ? 'active' : ''}"
+              data-bookmark-id="${recipe.id}" data-recipe-name="${safeName}" aria-label="북마크">
+        ${recipe.bookmarked ? '♥' : '♡'}
+      </button>
 
     <a href="recipe_detail.html?id=${recipe.id}" class="recipe-link">
       <div class="recipe-image-box" style="background-image: url('${recipe.image}');"></div>
@@ -157,38 +163,53 @@ function showLoginRequestNotification() {
    ============================================ */
 function attachBookmarkListeners(handler) {
 
-  document.querySelectorAll('.bookmark-btn').forEach(btn => {
+    document.querySelectorAll('.bookmark-btn').forEach(btn => {
 
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation(); // 카드 클릭 방지
-      e.preventDefault();  // 링크 이동 방지
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation(); // 카드 클릭 방지
+        e.preventDefault();  // 링크 이동 방지
 
-      // 🔒 로그인 상태 체크
-      const currentUser = localStorage.getItem('currentUser');
+        // 🔒 로그인 상태 체크
+        const currentUser = localStorage.getItem('currentUser');
 
-      if (!currentUser || currentUser === 'null' || currentUser === 'undefined') {
-        showLoginRequestNotification();
-        return;
-      }
-
-      const id = btn.dataset.bookmarkId;
-
-      // UI 즉시 토글
-      const isActive = btn.classList.toggle('active');
-      btn.textContent = isActive ? '♥' : '♡';
-
-      if (handler) {
-        try {
-          await handler(id, isActive);
-        } catch (err) {
-          console.error(err);
-          // rollback on failure
-          btn.classList.toggle('active');
-          btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
-          showToastNotification('즐겨찾기 반영에 실패했습니다.');
+        if (!currentUser || currentUser === 'null' || currentUser === 'undefined') {
+          showLoginRequestNotification();
+          return;
         }
-      }
-    });
 
-  });
-}
+        const id = btn.dataset.bookmarkId;
+        const recipeName = btn.dataset.recipeName || '레시피';
+        const hadNotification = Boolean(document.getElementById('commonNotification'));
+
+        // UI 즉시 토글
+        const isActive = btn.classList.toggle('active');
+        btn.textContent = isActive ? '♥' : '♡';
+
+        if (handler) {
+          try {
+            await handler(id, isActive);
+
+            const hasNotificationNow = Boolean(document.getElementById('commonNotification'));
+            if (!hadNotification && !hasNotificationNow) {
+              if (isActive) {
+                showToastNotification(
+                  `${recipeName}가 즐겨찾기에 추가되었습니다.`,
+                  '즐겨찾기 보기',
+                  () => { window.location.href = 'my_fav.html'; },
+                );
+              } else {
+                showToastNotification(`${recipeName} 즐겨찾기를 해제했습니다.`);
+              }
+            }
+          } catch (err) {
+            console.error(err);
+            // rollback on failure
+            btn.classList.toggle('active');
+            btn.textContent = btn.classList.contains('active') ? '♥' : '♡';
+            showToastNotification('즐겨찾기 반영에 실패했습니다.');
+          }
+        }
+      });
+
+    });
+  }

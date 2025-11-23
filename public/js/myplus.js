@@ -7,6 +7,13 @@ const addBtn = document.querySelector(".btn-add"); // 추가 버튼
 const saveBtn = document.querySelector(".btn-save"); // 저장 버튼
 const ingredientSection = document.querySelector(".ingredient-section"); // 재료 카테고리 묶음
 
+function requireApiClient() {
+    if (!window.apiClient) {
+        alert('데이터 모듈을 불러오지 못했습니다. 페이지를 새로고침한 후 다시 시도해주세요.');
+        throw new Error('apiClient not available');
+    }
+}
+
 // ✅ 수정된 카테고리 목록
 const CATEGORIES = ['전체', '채소류', '육류', '유제품', '곡물류', '기타'];
 
@@ -97,8 +104,9 @@ function addIngredient(name, categoryName) {
 }
 
 // ✅ 재료 정보를 서버에 저장
-async function saveIngredients() {
-    const categoriesOnScreen = document.querySelectorAll('.ingredient-section .category');
+  async function saveIngredients() {
+      requireApiClient();
+      const categoriesOnScreen = document.querySelectorAll('.ingredient-section .category');
     const items = [];
 
     categoriesOnScreen.forEach(categoryEl => {
@@ -131,8 +139,10 @@ async function saveIngredients() {
 }
 
 // ✅ 서버에서 재료를 로드하여 화면에 표시
-async function loadIngredients() {
-    createCategoryOptions();
+  async function loadIngredients() {
+      createCategoryOptions();
+
+      requireApiClient();
 
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
     if (!currentUser) {
