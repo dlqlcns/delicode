@@ -34,7 +34,37 @@ function createTag(term, type) {
     }
   });
 
+  const closeBtn = tag.querySelector('.tag-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeTagFromSearch(type, term);
+    });
+  }
+
   return tag;
+}
+
+function removeTagFromSearch(type, term) {
+  const params = new URLSearchParams(window.location.search);
+
+  if (type === 'query') {
+    params.delete('query');
+  } else if (type === 'ingredients') {
+    const ingredients = (params.get('ingredients') || '')
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+      .filter(value => value !== term);
+
+    if (ingredients.length > 0) {
+      params.set('ingredients', ingredients.join(','));
+    } else {
+      params.delete('ingredients');
+    }
+  }
+
+  window.location.search = params.toString();
 }
 
 function displayTags(params) {

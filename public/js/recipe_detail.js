@@ -37,25 +37,27 @@ function renderRecipeDetail(recipe) {
         ingredientsContainer.innerHTML = '<p>재료 정보가 없습니다.</p>';
     }
 
-    const stepsContainer = document.getElementById('stepsContainer');
-    stepsContainer.innerHTML = '';
+    const stepsContainer = document.getElementById('recipeStepsList');
+    if (stepsContainer) {
+        stepsContainer.innerHTML = '';
 
-    if (recipe.steps && recipe.steps.length > 0) {
-        recipe.steps.forEach(step => {
-            const stepItem = document.createElement('div');
-            stepItem.className = 'step-item';
+        if (recipe.steps && recipe.steps.length > 0) {
+            recipe.steps.forEach(step => {
+                const stepItem = document.createElement('div');
+                stepItem.className = 'step-item';
 
-            stepItem.innerHTML = `
-                <div class="step-number">${step.step_order}</div>
-                <div class="step-content">
-                    <h4>단계 ${step.step_order}</h4>
-                    <p>${step.step_description}</p>
-                </div>
-            `;
-            stepsContainer.appendChild(stepItem);
-        });
-    } else {
-        stepsContainer.innerHTML = '<p>조리 단계 정보가 없습니다.</p>';
+                stepItem.innerHTML = `
+                    <div class="step-number">${step.step_order}</div>
+                    <div class="step-content">
+                        <h4>단계 ${step.step_order}</h4>
+                        <p>${step.step_description}</p>
+                    </div>
+                `;
+                stepsContainer.appendChild(stepItem);
+            });
+        } else {
+            stepsContainer.innerHTML = '<p>조리 단계 정보가 없습니다.</p>';
+        }
     }
 }
 

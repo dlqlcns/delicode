@@ -38,7 +38,7 @@ async function loadRecommendedRecipes() {
   const status = document.getElementById('recipeStatus');
   try {
     if (status) status.textContent = '추천 레시피를 불러오는 중입니다...';
-    const response = await window.apiClient.fetchRecipes({ limit: 6 });
+    const response = await window.apiClient.fetchRecipes({ limit: 5 });
     recipes = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
     renderRecipeCards();
     if (status) status.textContent = recipes.length ? '' : '표시할 레시피가 없습니다.';

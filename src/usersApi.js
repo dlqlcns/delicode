@@ -42,14 +42,17 @@ async function registerUser(payload) {
   return sanitizeUser(data[0]);
 }
 
-async function loginUser({ email, password }) {
-  if (!email || !password) {
-    const error = new Error('email and password are required');
+async function loginUser({ identifier, password }) {
+  if (!identifier || !password) {
+    const error = new Error('email/username and password are required');
     error.status = 400;
     throw error;
   }
 
-  const query = buildQuery({ select: 'id,username,email,password_hash,allergies,ingredients,created_at', email: `eq.${email}` });
+  const query = buildQuery({
+    select: 'id,username,email,password_hash,allergies,ingredients,created_at',
+    or: `(email.eq.${identifier},username.eq.${identifier})`,
+  });
   const users = await supabaseRequest(`/users${query}`);
   const user = users[0];
   if (!user || !verifyPassword(user.password_hash, password)) {

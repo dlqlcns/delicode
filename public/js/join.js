@@ -7,15 +7,72 @@ const passwordConfirmInput = document.getElementById('passwordConfirm');
 const idCheckBtn = document.getElementById('idCheck');
 const emailCheckBtn = document.getElementById('emailCheck');
 const allergyContainer = document.getElementById('allergyContainer');
+const idMessage = document.getElementById('idMessage');
+const emailMessage = document.getElementById('emailMessage');
+const passwordMessage = document.getElementById('passwordMessage');
+const passwordConfirmMessage = document.getElementById('passwordConfirmMessage');
+
+const usernameRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getCheckedValues(container) {
     if (!container) return [];
     return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
 }
 
+function setFeedback(el, message, isValid = false) {
+    if (!el) return;
+    el.textContent = message;
+    el.classList.toggle('valid-message', Boolean(isValid));
+}
+
+function isValidPasswordFormat(value) {
+    if (!value || value.length < 8) return false;
+    let categories = 0;
+    if (/[A-Za-z]/.test(value)) categories += 1;
+    if (/\d/.test(value)) categories += 1;
+    if (/[!%^&*_]/.test(value)) categories += 1;
+    return categories >= 2;
+}
+
+function validateUsername() {
+    const value = userIdInput?.value.trim() || '';
+    const valid = usernameRegex.test(value);
+    setFeedback(idMessage, valid ? '' : '올바르지 않은 형식입니다.');
+    return valid;
+}
+
+function validateEmail() {
+    const value = emailInput?.value.trim() || '';
+    const valid = emailRegex.test(value);
+    setFeedback(emailMessage, valid ? '' : '올바르지 않은 형식입니다.');
+    return valid;
+}
+
+function validatePassword() {
+    const value = passwordInput?.value.trim() || '';
+    const valid = isValidPasswordFormat(value);
+    setFeedback(passwordMessage, valid ? '' : '올바르지 않은 형식입니다.');
+    return valid;
+}
+
 function validatePasswordMatch() {
     if (!passwordInput || !passwordConfirmInput) return true;
-    return passwordInput.value === passwordConfirmInput.value;
+    const base = passwordInput.value;
+    const confirm = passwordConfirmInput.value;
+
+    if (!confirm) {
+        setFeedback(passwordConfirmMessage, '');
+        return false;
+    }
+
+    if (base === confirm) {
+        setFeedback(passwordConfirmMessage, '비밀번호가 일치합니다.', true);
+        return true;
+    }
+
+    setFeedback(passwordConfirmMessage, '비밀번호가 일치하지 않습니다.');
+    return false;
 }
 
 async function checkAvailability({ username, email }) {
@@ -32,7 +89,10 @@ async function checkAvailability({ username, email }) {
 if (idCheckBtn) {
     idCheckBtn.addEventListener('click', async () => {
         const username = userIdInput?.value.trim();
-        if (!username) return alert('아이디를 입력해주세요.');
+        if (!validateUsername()) {
+            alert('아이디를 올바르게 입력해주세요.');
+            return;
+        }
         const available = await checkAvailability({ username });
         alert(available ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.');
     });
@@ -41,11 +101,22 @@ if (idCheckBtn) {
 if (emailCheckBtn) {
     emailCheckBtn.addEventListener('click', async () => {
         const email = emailInput?.value.trim();
-        if (!email) return alert('이메일을 입력해주세요.');
+        if (!validateEmail()) {
+            alert('이메일을 올바르게 입력해주세요.');
+            return;
+        }
         const available = await checkAvailability({ email });
         alert(available ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.');
     });
 }
+
+if (userIdInput) userIdInput.addEventListener('input', validateUsername);
+if (emailInput) emailInput.addEventListener('input', validateEmail);
+if (passwordInput) passwordInput.addEventListener('input', () => {
+    validatePassword();
+    validatePasswordMatch();
+});
+if (passwordConfirmInput) passwordConfirmInput.addEventListener('input', validatePasswordMatch);
 
 async function handleJoin(event) {
     event.preventDefault();
@@ -55,13 +126,15 @@ async function handleJoin(event) {
     const password = passwordInput?.value.trim();
     const passwordConfirm = passwordConfirmInput?.value.trim();
 
-    if (!username || !email || !password) {
-        alert('필수 정보를 모두 입력해주세요.');
-        return;
-    }
+    const validations = [
+        validateUsername(),
+        validateEmail(),
+        validatePassword(),
+        validatePasswordMatch(),
+    ];
 
-    if (!validatePasswordMatch()) {
-        alert('비밀번호가 일치하지 않습니다.');
+    if (validations.includes(false) || !username || !email || !password || !passwordConfirm) {
+        alert('입력한 정보를 다시 확인해주세요.');
         return;
     }
 
