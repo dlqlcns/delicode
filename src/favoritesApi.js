@@ -19,11 +19,20 @@ async function addFavorite(userId, recipeId) {
     throw error;
   }
 
-  await supabaseRequest('/favorites?on_conflict=user_id,recipe_id', {
+  const deleteQuery = buildQuery({ user_id: `eq.${userId}`, recipe_id: `eq.${recipeId}` });
+  await supabaseRequest(`/favorites${deleteQuery}`, { method: 'DELETE' });
+
+  const inserted = await supabaseRequest('/favorites', {
     method: 'POST',
     body: [{ user_id: userId, recipe_id: recipeId }],
-    prefer: 'return=representation,resolution=merge-duplicates',
+    prefer: 'return=representation',
   });
+
+  if (!Array.isArray(inserted) || inserted.length === 0) {
+    const error = new Error('Favorite could not be saved');
+    error.status = 500;
+    throw error;
+  }
 
   return getFavorites(userId);
 }
