@@ -151,7 +151,18 @@ async function handleUsers(req, res, url) {
 }
 
 async function handleFavorites(req, res, url) {
-  if (req.method === 'GET' && url.pathname === '/api/favorites') {
+  const isFavoritesPath = url.pathname === '/api/favorites';
+  if (!isFavoritesPath) return notFound(res);
+
+  const safeParseBody = async () => {
+    try {
+      return await parseJsonBody(req);
+    } catch (err) {
+      return null;
+    }
+  };
+
+  if (req.method === 'GET') {
     const userId = url.searchParams.get('userId');
     try {
       const favorites = await getFavorites(userId);
@@ -162,25 +173,23 @@ async function handleFavorites(req, res, url) {
     }
   }
 
-  if (req.method === 'POST' && url.pathname === '/api/favorites') {
+  if (req.method === 'POST' || req.method === 'DELETE') {
     try {
-      const { userId, recipeId } = await parseJsonBody(req);
-      const favorites = await addFavorite(userId, recipeId);
-      return sendJson(res, 200, { favorites });
-    } catch (err) {
-      const status = err.status || 500;
-      return sendError(res, status, err.message || 'Failed to save favorite');
-    }
-  }
+      const parsed = await safeParseBody();
+      const userId = parsed?.userId ?? url.searchParams.get('userId');
+      const recipeId = parsed?.recipeId ?? url.searchParams.get('recipeId');
 
-  if (req.method === 'DELETE' && url.pathname === '/api/favorites') {
-    try {
-      const { userId, recipeId } = await parseJsonBody(req);
+      if (req.method === 'POST') {
+        const favorites = await addFavorite(userId, recipeId);
+        return sendJson(res, 200, { favorites });
+      }
+
       const favorites = await removeFavorite(userId, recipeId);
       return sendJson(res, 200, { favorites });
     } catch (err) {
       const status = err.status || 500;
-      return sendError(res, status, err.message || 'Failed to remove favorite');
+      const defaultMessage = req.method === 'POST' ? 'Failed to save favorite' : 'Failed to remove favorite';
+      return sendError(res, status, err.message || defaultMessage);
     }
   }
 
