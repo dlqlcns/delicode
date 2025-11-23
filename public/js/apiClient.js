@@ -66,29 +66,42 @@ async function saveUserIngredientsApi(userId, items) {
 }
 
 const FAVORITES_PREFIX = 'favorites_user_';
+const inMemoryFavorites = new Map();
+
+function normalizeIds(ids) {
+  return Array.from(new Set(ids.map(id => Number(id)).filter(Number.isFinite)));
+}
 
 function readFavorites(userId) {
   if (!userId) return [];
   const key = `${FAVORITES_PREFIX}${userId}`;
+
   try {
     const raw = localStorage.getItem(key);
     const list = raw ? JSON.parse(raw) : [];
-    return Array.isArray(list)
-      ? list.map(id => Number(id)).filter(Number.isFinite)
-      : [];
+    const normalized = Array.isArray(list) ? normalizeIds(list) : [];
+    inMemoryFavorites.set(userId, normalized);
+    return normalized;
   } catch (err) {
-    console.warn('즐겨찾기 목록을 불러오지 못했습니다. 로컬 스토리지를 초기화합니다.', err);
-    localStorage.removeItem(key);
-    return [];
+    console.warn('즐겨찾기 목록을 불러오지 못했습니다. 로컬 스토리지 대신 메모리 저장소를 사용합니다.', err);
+    const fallback = inMemoryFavorites.get(userId) || [];
+    return normalizeIds(fallback);
   }
 }
 
 function writeFavorites(userId, ids) {
   if (!userId) return [];
   const key = `${FAVORITES_PREFIX}${userId}`;
-  const unique = Array.from(new Set(ids.map(id => Number(id)).filter(Number.isFinite)));
-  localStorage.setItem(key, JSON.stringify(unique));
-  return unique;
+  const normalized = normalizeIds(ids);
+  inMemoryFavorites.set(userId, normalized);
+
+  try {
+    localStorage.setItem(key, JSON.stringify(normalized));
+  } catch (err) {
+    console.warn('로컬 스토리지에 즐겨찾기를 저장할 수 없습니다. 세션 동안 메모리에 저장합니다.', err);
+  }
+
+  return normalized;
 }
 
 async function fetchFavorites(userId) {
