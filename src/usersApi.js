@@ -12,32 +12,20 @@ function sanitizeUser(user) {
 }
 
 async function checkUserExists({ username, email, excludeId }) {
-  const lookups = [];
+  const filters = [];
+  if (username) filters.push(`username.ilike.${username}`);
+  if (email) filters.push(`email.ilike.${email}`);
+  if (!filters.length) return [];
 
-  if (username) {
-    const query = buildQuery({
-      select: 'id,username,email',
-      username: `eq.${username}`,
-      id: excludeId ? `neq.${excludeId}` : undefined,
-      limit: 1,
-    });
-    lookups.push(supabaseRequest(`/users${query}`));
-  }
+  const query = buildQuery({
+    select: 'id,username,email',
+    or: `(${filters.join(',')})`,
+    id: excludeId ? `neq.${excludeId}` : undefined,
+    limit: 1,
+  });
 
-  if (email) {
-    const query = buildQuery({
-      select: 'id,username,email',
-      email: `eq.${email}`,
-      id: excludeId ? `neq.${excludeId}` : undefined,
-      limit: 1,
-    });
-    lookups.push(supabaseRequest(`/users${query}`));
-  }
-
-  if (!lookups.length) return [];
-
-  const results = await Promise.all(lookups);
-  return results.flat();
+  const rows = await supabaseRequest(`/users${query}`);
+  return rows;
 }
 
 async function registerUser(payload) {
@@ -86,7 +74,7 @@ async function loginUser({ identifier, password }) {
   const users = await supabaseRequest(`/users${query}`);
   const user = users[0];
   if (!user || !verifyPassword(user.password_hash, password)) {
-    const error = new Error('Invalid email or password');
+    const error = new Error('등록되지 않은 아이디이거나 아이디 또는 비밀번호를 잘못 입력했습니다.');
     error.status = 401;
     throw error;
   }

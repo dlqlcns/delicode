@@ -172,8 +172,9 @@ async function loadIngredients() {
         updateCount();
     } catch (err) {
         console.error(err);
-        alert('재료 정보를 불러오지 못했습니다. 다시 로그인해주세요.');
-        window.location.href = 'login.html';
+        // 빈 목록인 경우에도 세션이 끊기지 않도록 화면만 업데이트
+        ingredientSection.innerHTML = '<p class="ingredient-empty">등록된 재료가 없습니다. 추가해보세요.</p>';
+        updateCount();
     }
 }
 

@@ -163,6 +163,12 @@ max-width: 1200px;
   gap: 0.75rem;
 }
 
+.ingredient-empty {
+  color: #666;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
 /* 태그 스타일 - recipe_results와 동일 */
 .badge {
   display: flex;

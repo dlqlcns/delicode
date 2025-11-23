@@ -24,6 +24,9 @@ function setFeedback(el, message, isValid = false) {
     if (!el) return;
     el.textContent = message;
     el.classList.toggle('valid-message', Boolean(isValid));
+    if (!isValid && message) {
+        el.classList.remove('valid-message');
+    }
 }
 
 function isValidPasswordFormat(value) {
@@ -95,7 +98,7 @@ if (idCheckBtn) {
         }
         const { available } = await checkAvailability({ username });
         if (available === null) return;
-        alert(available ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.');
+        setFeedback(idMessage, available ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.', available);
     });
 }
 
@@ -108,7 +111,7 @@ if (emailCheckBtn) {
         }
         const { available } = await checkAvailability({ email });
         if (available === null) return;
-        alert(available ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.');
+        setFeedback(emailMessage, available ? '사용 가능한 이메일입니다.' : '이미 사용 중인 이메일입니다.', available);
     });
 }
 

@@ -19,7 +19,7 @@ async function addFavorite(userId, recipeId) {
     throw error;
   }
 
-  await supabaseRequest('/favorites', {
+  await supabaseRequest('/favorites?on_conflict=user_id,recipe_id', {
     method: 'POST',
     body: [{ user_id: userId, recipe_id: recipeId }],
     prefer: 'return=representation,resolution=merge-duplicates',

@@ -171,17 +171,21 @@ function renderRecipes(recipes) {
 
 function sortRecipes(recipes, sortBy) {
   const sorted = [...recipes];
-  switch (sortBy) {
+  const mode = sortBy || '최신순';
+  switch (mode) {
     case 'time-asc':
+    case '조리 시간순':
       sorted.sort((a, b) => parseInt(a.time) - parseInt(b.time));
       break;
     case 'time-desc':
       sorted.sort((a, b) => parseInt(b.time) - parseInt(a.time));
       break;
     case 'name':
+    case '이름순':
       sorted.sort((a, b) => a.name.localeCompare(b.name));
       break;
     default:
+      sorted.sort((a, b) => (a.id < b.id ? 1 : -1));
       break;
   }
   return sorted;
