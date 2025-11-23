@@ -19,16 +19,16 @@ async function addFavorite(userId, recipeId) {
     throw error;
   }
 
-  const deleteQuery = buildQuery({ user_id: `eq.${userId}`, recipe_id: `eq.${recipeId}` });
-  await supabaseRequest(`/favorites${deleteQuery}`, { method: 'DELETE' });
-
-  const inserted = await supabaseRequest('/favorites', {
+  // Use an upsert to guarantee one favorite row per user/recipe pair and make
+  // sure created_at is populated for visibility in the DB console.
+  const upsertQuery = buildQuery({ on_conflict: 'user_id,recipe_id' });
+  const inserted = await supabaseRequest(`/favorites${upsertQuery}`, {
     method: 'POST',
-    body: [{ user_id: userId, recipe_id: recipeId }],
-    prefer: 'return=representation',
+    body: [{ user_id: userId, recipe_id: recipeId, created_at: new Date().toISOString() }],
+    prefer: 'return=representation,resolution=merge-duplicates',
   });
 
-  if (!Array.isArray(inserted) || inserted.length === 0) {
+  if (!Array.isArray(inserted) || inserted.length === 0 || !inserted.some(row => row.recipe_id === recipeId)) {
     const error = new Error('Favorite could not be saved');
     error.status = 500;
     throw error;
