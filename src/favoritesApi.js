@@ -19,13 +19,16 @@ async function addFavorite(userId, recipeId) {
     throw error;
   }
 
-  // Use an upsert to guarantee one favorite row per user/recipe pair and make
-  // sure created_at is populated for visibility in the DB console.
-  const upsertQuery = buildQuery({ on_conflict: 'user_id,recipe_id' });
-  const inserted = await supabaseRequest(`/favorites${upsertQuery}`, {
+  // Clear any existing rows for this user/recipe pair before inserting so the
+  // insert never fails due to missing constraints while still keeping the
+  // table deduplicated.
+  await removeFavorite(userId, recipeId);
+
+  const insertQuery = buildQuery({ select: 'recipe_id' });
+  const inserted = await supabaseRequest(`/favorites${insertQuery}`, {
     method: 'POST',
     body: [{ user_id: userId, recipe_id: recipeId, created_at: new Date().toISOString() }],
-    prefer: 'return=representation,resolution=merge-duplicates',
+    prefer: 'return=representation',
   });
 
   if (!Array.isArray(inserted) || inserted.length === 0 || !inserted.some(row => row.recipe_id === recipeId)) {
