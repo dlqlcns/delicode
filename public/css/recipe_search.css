@@ -1,0 +1,180 @@
+/* ============================================ */
+/* recipe_search.css - 레시피 검색 페이지 전용 */
+/* ============================================ */
+
+.main-content {
+  width: 100%;
+  min-height: calc(100vh - 300px);
+  background: linear-gradient(180deg, #ffffff 100%);
+  padding: 4rem 2rem;
+}
+
+.content-wrapper {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.main-title {
+  font-size: 40px;
+  font-weight: 800;
+  color: #3459ff;
+  text-align: center;
+  letter-spacing: -2px;
+}
+
+.sub-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #242424;
+  text-align: center;
+  letter-spacing: -1px;
+  margin-top: -1rem;
+}
+
+.input-section,
+.exclude-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.ingredient-input {
+  width: 100%;
+  height: 60px;
+  padding: 0 3rem 0 1.5rem;
+  border: 2px solid #3459ff;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.ingredient-input:focus {
+  outline: none;
+  border-color: #2347dd;
+  box-shadow: 0 0 0 3px rgba(52, 89, 255, 0.1);
+}
+
+.ingredient-input::placeholder {
+  color: #d1d5db;
+}
+
+.clear-button {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-button:hover {
+  color: #9ca3af;
+}
+
+.input-hint {
+  font-size: 12px;
+  color: #9ca3af;
+  padding-left: 0.5rem;
+}
+
+.recent-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #242424;
+}
+
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #f3f4f6;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #4b5563;
+  transition: background-color 0.2s;
+}
+
+.tag:hover {
+  background-color: #e5e7eb;
+}
+
+.tag-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tag-close:hover {
+  color: #ef4444;
+}
+
+.search-button {
+  width: 100%;
+  max-width: 700px;
+  height: 60px;
+  background-color: #3459ff;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 1rem;
+}
+
+.search-button:hover {
+  background-color: #2347dd;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 89, 255, 0.3);
+}
+
+.search-button:active {
+  transform: translateY(0);
+}
+
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}

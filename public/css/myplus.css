@@ -1,0 +1,263 @@
+/* ============================================ */
+/* myplus.css - 재료등록 페이지 */
+/* ============================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Nanum Gothic", sans-serif;
+  color: #393939;
+  background-color: white;
+}
+
+/* ============================================ */
+/* 메인 컨테이너 - recipe 페이지와 동일한 여백 */
+/* ============================================ */
+
+.main {
+max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+/* ============================================ */
+/* 제목 영역 - recipe 페이지와 동일한 스타일 */
+/* ============================================ */
+
+.title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 14px;
+}
+
+/* ============================================ */
+/* 카드 */
+/* ============================================ */
+
+.card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.card-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-header h2 {
+  color: #111;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.section-header p {
+  color: #888;
+  font-size: 14px;
+}
+
+/* ============================================ */
+/* 재료 추가 입력란 */
+/* ============================================ */
+
+.add-row {
+  display: flex;
+  gap: 12px;
+}
+
+.input {
+  flex: 1;
+  height: 48px;
+  background: #f5f5f5;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 1rem;
+  font-size: 14px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #3459ff;
+  background: white;
+}
+
+.select {
+  width: 120px;
+  height: 48px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 1rem;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-add {
+  width: 100px;
+  height: 48px;
+  background: #3459ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-add:hover {
+  background: #2347dd;
+}
+
+/* ============================================ */
+/* 재료 목록 - recipe_results 태그 스타일 적용 */
+/* ============================================ */
+
+.ingredient-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.category h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+}
+
+/* 태그 컨테이너 - recipe_results와 동일 */
+.badge-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* 태그 스타일 - recipe_results와 동일 */
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #f3f4f6;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #4b5563;
+  transition: background-color 0.2s;
+  cursor: default;
+}
+
+.badge:hover {
+  background-color: #e5e7eb;
+}
+
+.badge-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-close:hover {
+  color: #ef4444;
+}
+
+/* ============================================ */
+/* 저장 버튼 */
+/* ============================================ */
+
+.save-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.btn-save {
+  height: 48px;
+  padding: 0 2rem;
+  background: #3459ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-save:hover {
+  background: #2347dd;
+}
+
+/* ============================================ */
+/* 반응형 */
+/* ============================================ */
+
+@media (max-width: 768px) {
+  .main {
+    padding: 2rem 1rem;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .add-row {
+    flex-wrap: wrap;
+  }
+
+  .select {
+    width: 100px;
+  }
+
+  .btn-add {
+    width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 24px;
+  }
+
+  .section-header h2 {
+    font-size: 20px;
+  }
+}

@@ -1,0 +1,93 @@
+/* ============================================ */
+/* recipe_all.css - 레시피 전체 보기 페이지 전용 */
+/* ============================================ */
+
+/* 메인 컨테이너 */
+.all-recipes-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* 헤더/필터 영역 */
+.all-recipes-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.all-recipes-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #111;
+}
+
+.all-recipes-subtitle {
+  color: #888;
+  font-size: 14px;
+  margin-bottom: 1.5rem;
+}
+
+.search-and-filter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* 필터/정렬 바 */
+.filter-sort-bar {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 14px;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.select-box {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  background-color: white;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 2rem;
+}
+
+/* 레시피 목록 그리드 배치 */
+.recipe-list.grid-view {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+  padding: 0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .search-and-filter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-sort-bar {
+    justify-content: flex-end;
+  }
+
+  .recipe-list.grid-view {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .recipe-list.grid-view {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}

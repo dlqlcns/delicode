@@ -1,0 +1,244 @@
+/* 기본 설정 */
+body {
+  margin: 0;
+  font-family: 'Nanum Gothic', sans-serif;
+  background-color: #f7f7f7; 
+  min-width: 1440px; 
+  min-height: 900px; 
+}
+
+/* login.html과 동일한 헤더 스타일 - 애니메이션 삭제 */
+.login-header {
+  background-color: white;
+  border-bottom: 1px solid #cacaca;
+  /* 애니메이션 관련 코드 삭제 */
+}
+
+.login-nav {
+  position: relative;
+  height: 85px;
+  border-bottom: 1px solid #cacaca;
+  background-color: white;
+}
+
+.nav-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.login-logo {
+  width: 120px;
+  height: auto;
+  display: block;
+}
+
+.nav-right {
+  position: absolute;
+  top: 50%;
+  right: 32px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-btn {
+  padding: 4px 5px;
+  background: white;
+  border: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: #393939;
+  cursor: pointer;
+}
+
+.vertical-divider {
+  width: 1px;
+  height: 12px;
+  background-color: #cacaca;
+  margin: 0 6px;
+}
+
+
+/* 메인 컨테이너 */
+.join-container {
+  width: 100%;
+  min-height: calc(100vh - 86px); 
+  background-color: #f9fafb;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 1rem;
+}
+
+/* 회원가입 폼 - 애니메이션 삭제 */
+.join-form {
+  width: 100%;
+  max-width: 720px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  /* 애니메이션 관련 코드 삭제 */
+}
+
+.join-title {
+  font-family: 'Nanum Gothic', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #393939;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0;
+}
+
+.form-group {
+    margin-bottom: 1.5rem; 
+}
+.form-group:last-of-type {
+    margin-bottom: 0; 
+}
+
+/* login.html에서 input-row 클래스로 변경되었으므로 수정 */
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start; /* 버튼과 input의 정렬 */
+}
+
+.input-field {
+  flex: 1;
+  width: 100%;
+  height: 54px; 
+  padding: 0 16px; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 8px; 
+  font-size: 14px;
+  color: #393939; 
+  font-family: 'Nanum Gothic', sans-serif;
+  background-color: #f5f5f5; 
+  box-sizing: border-box; 
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #3459ff;
+  background-color: white; 
+}
+
+.input-field.error {
+  border-color: #ef4444; 
+}
+
+.input-field::placeholder {
+  color: #9ca3af;
+}
+
+.check-btn,
+.add-btn {
+  height: 54px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 700;
+  background-color: #f9fafb;
+  color: #393939;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.check-btn:hover,
+.add-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.join-section {
+  padding: 2rem 0 0;
+  border-top: 1px solid #f3f4f6;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #393939;
+  margin-bottom: 1rem;
+}
+
+.allergy-input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px 20px;
+}
+
+.checkbox-grid label {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color: #4b5563;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+
+.checkbox-grid input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* 힌트 텍스트 스타일 */
+.hint-text {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 0.25rem; 
+  margin-bottom: 0.5rem; 
+}
+
+/* 메시지 영역 스타일 */
+.check-message,
+.password-confirm-message {
+  font-size: 13px;
+  margin-top: 0.25rem; 
+  color: #ef4444; /* 기본 오류 메시지 색상 */
+  font-weight: 400;
+}
+
+/* 비밀번호 일치 시 사용할 초록색 메시지 스타일 */
+.valid-message {
+  color: #16a34a !important;
+  font-weight: 600;
+}
+
+.submit-btn {
+  height: 48px; 
+  background-color: #3459ff;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 1rem;
+  font-family: 'Nanum Gothic', sans-serif;
+}
+
+.submit-btn:hover {
+  background-color: #2347dd;
+  transform: translateY(-1px);
+}
+.submit-btn:active {
+  transform: translateY(0);
+}

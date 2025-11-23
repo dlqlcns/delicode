@@ -1,0 +1,181 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+.my-edit-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+body {
+  font-family: "Nanum Gothic", sans-serif;
+  color: #393939;
+  background-color: white;
+}
+
+/* ===== 프로필 영역 ===== */
+.profile-section {
+  padding: 40px 32px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-section h1 {
+  color: #3459ff;
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #3459ff33;
+  border-radius: 14px;
+  padding: 32px;
+}
+
+.card h2 {
+  color: #3459ff;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.card p {
+  font-size: 14px;
+  color: #495565;
+  margin-bottom: 16px;
+}
+
+/* 사진 없이 입력창만 사용할 때 */
+.profile-info {
+  display: block;
+}
+
+.info-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field label {
+  font-size: 14px;
+  color: #354152;
+}
+
+.field input,
+.field select {
+  height: 36px;
+  background: #f3f3f5;
+  border: 1px solid #d0d5db;
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 14px;
+  color: #717182;
+  
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 알레르기 그리드 */
+.allergy-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.allergy-grid label {
+  font-size: 14px;
+  color: #111;
+  cursor: pointer;
+}
+
+.allergy-grid input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* 선호 요리 카테고리 그리드 (알레르기와 동일한 스타일) */
+.preference-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.preference-grid label {
+  font-size: 14px;
+  color: #111;
+  cursor: pointer;
+}
+
+.preference-grid input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* 카테고리 */
+.empty-message {
+  text-align: center;
+  color: #99a1ae;
+  padding: 20px 0;
+}
+
+/* 위험 영역 */
+.card.danger {
+  background: #fef2f24c;
+  border-color: #ffc9c9;
+}
+
+.danger-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.danger-inner .icon {
+  font-size: 32px;
+  color: #e7000b;
+}
+
+.danger-inner h2 {
+  color: #e7000b;
+  margin-bottom: 8px;
+}
+
+.danger-btn {
+  background: #e7000b;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.danger-btn:hover {
+  background: #c50009;
+}
+
+/* 저장 버튼 */
+.save-btn {
+  width: 100%;
+  height: 48px;
+  background: #3459ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #2847cc;
+}

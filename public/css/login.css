@@ -1,0 +1,290 @@
+/* 기본 설정 */
+body {
+  margin: 0;
+  font-family: 'Nanum Gothic', sans-serif;
+  background-color: #f7f7f7;
+  /* join.css와 통일 */
+  min-width: 1440px; 
+  min-height: 900px;
+}
+
+/* 헤더 - 애니메이션 관련 스타일 삭제 */
+.login-header {
+  background-color: white;
+  border-bottom: 1px solid #cacaca;
+  /* animation: fade-in 0.5s ease-in-out forwards; */
+  /* transform: translateY(-1rem); */
+  /* opacity: 0; */
+}
+
+.login-nav {
+  position: relative;
+  height: 85px;
+  border-bottom: 1px solid #cacaca;
+  background-color: white;
+}
+
+/* 로고 */
+.nav-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.login-logo {
+  width: 120px;
+  height: auto;
+  display: block;
+}
+
+/* 오른쪽 버튼 영역 */
+.nav-right {
+  position: absolute;
+  top: 50%;
+  right: 32px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 네비게이션 버튼 스타일 */
+.nav-btn {
+  padding: 4px 5px;
+  background: white;
+  border: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: #393939;
+  cursor: pointer;
+}
+
+.vertical-divider {
+  width: 1px;
+  height: 12px;
+  background-color: #cacaca;
+  margin: 0 6px;
+}
+
+/* 메인 - join-container와 통일 */
+.login-main {
+  width: 100%;
+  min-height: calc(100vh - 86px); /* 헤더 높이(85px)를 제외한 최소 높이 */
+  background-color: #f9fafb; /* join.css의 배경색 */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* 상단 정렬 */
+  padding: 4rem 1rem; /* join.css의 패딩 */
+}
+
+/* 로그인 폼 카드 - join-form과 통일, 애니메이션 삭제 */
+.login-card {
+  width: 100%;
+  max-width: 720px; /* 로그인 카드의 최대 너비 설정 (가로 크기 축소) */
+  margin: 0 10rem; /* 로그인 카드의 상하 여백 0, 좌우 여백 1rem 설정 */
+  background: white;
+  border: none;
+  border-radius: 20px; /* join-form과 통일 */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); /* join-form과 통일 */
+  padding: 2.5rem 3rem; /* 로그인 카드 내부 콘텐츠의 상하 2.5rem, 좌우 3rem 여백 */
+  /* animation: fade-in 0.5s ease-in-out forwards; */
+  /* transform: translateY(-1rem); */
+  /* opacity: 0; */
+}
+
+.login-title {
+  font-family: 'Nanum Gothic', sans-serif; /* join-title과 통일 */
+  font-size: 28px; /* join-title과 통일 */
+  font-weight: 800; /* join-title과 통일 */
+  color: #393939;
+  text-align: center;
+  margin-bottom: 2rem; /* join-title 아래 간격 */
+  letter-spacing: 0;
+}
+
+/* 폼 */
+/* login-form-inner 제거, login-form 클래스 사용 */
+.login-form {
+  max-width: 600px; 
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* form-group 스타일 추가 (join.css에서 가져옴) */
+.form-group {
+    margin-bottom: 1.5rem; 
+}
+.form-group:last-child {
+    margin-bottom: 0; 
+}
+
+/* 입력 필드 - join.css의 .input-field와 통일 */
+/* login-input 클래스를 input-field로 통일 */
+.input-field {
+  flex: 1;
+  width: 100%;
+  height: 54px; 
+  padding: 0 16px; 
+  border: 1px solid #e5e7eb; 
+  border-radius: 8px; 
+  font-size: 14px;
+  color: #393939; 
+  font-family: 'Nanum Gothic', sans-serif;
+  background-color: #f5f5f5; 
+  box-sizing: border-box; 
+  transition: all 0.2s;
+}
+.input-field:focus {
+  outline: none;
+  border-color: #3459ff;
+  background-color: white; 
+}
+.input-field.error {
+  border-color: #ef4444; 
+}
+
+.input-field::placeholder {
+  color: #9ca3af; 
+}
+
+/* 로그인 버튼 - join.css의 .submit-btn과 통일 */
+/* login-button 클래스를 submit-btn으로 통일 */
+.submit-btn {
+  height: 48px; 
+  background-color: #3459ff; 
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px; 
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+  font-family: 'Nanum Gothic', sans-serif;
+}
+.submit-btn:hover {
+  background-color: #2347dd;
+  transform: translateY(-1px);
+}
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+.login-links {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  font-size: 14px;
+  color: #474747;
+  margin-top: 30px;
+}
+
+.login-links button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Nanum Gothic', sans-serif;
+  color: #474747; 
+}
+
+.login-links button:hover {
+  text-decoration: underline;
+}
+
+/* SNS 구분선 */
+.sns-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 32px 0;
+}
+
+.sns-divider .line {
+  flex: 1;
+  height: 1px;
+  background-color: #e5e7eb; 
+}
+
+.sns-divider span {
+  font-size: 14px;
+  color: #9ca3af; 
+  white-space: nowrap;
+}
+
+/* SNS 버튼 */
+.social-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 54px; 
+  width: 100%;
+  border-radius: 8px; 
+  border: none;
+  font-weight: 700;
+  font-size: 16px; 
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.social-btn img {
+  width: 20px; 
+  height: 20px;
+  object-fit: contain;
+  margin-left: 4px;
+}
+
+.social-btn span {
+  text-align: center;
+  flex: 1;
+  font-family: 'Nanum Gothic', sans-serif;
+}
+
+.google {
+  background-color: white;
+  color: #000000d9;
+  border: 1px solid #d1d5db; 
+}
+
+.kakao {
+  background-color: #fee500;
+  color: #000000d9;
+  border: none;
+}
+
+.naver {
+  background-color: #03c75a;
+  color: white;
+  border: none;
+}
+
+/* 메시지 스타일 추가 (join.css에서 가져옴) */
+.check-message {
+    font-size: 13px;
+    margin-top: 0.25rem; 
+    color: #ef4444; 
+    font-weight: 400;
+}
+.valid-message {
+    color: #16a34a !important;
+    font-weight: 600;
+}
+
+/* @keyframes fade-in 자체도 삭제 */
+
+
+
