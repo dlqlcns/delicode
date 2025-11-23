@@ -65,17 +65,47 @@ async function saveUserIngredientsApi(userId, items) {
   });
 }
 
+const FAVORITES_PREFIX = 'favorites_user_';
+
+function readFavorites(userId) {
+  if (!userId) return [];
+  const key = `${FAVORITES_PREFIX}${userId}`;
+  try {
+    const raw = localStorage.getItem(key);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list)
+      ? list.map(id => Number(id)).filter(Number.isFinite)
+      : [];
+  } catch (err) {
+    console.warn('즐겨찾기 목록을 불러오지 못했습니다. 로컬 스토리지를 초기화합니다.', err);
+    localStorage.removeItem(key);
+    return [];
+  }
+}
+
+function writeFavorites(userId, ids) {
+  if (!userId) return [];
+  const key = `${FAVORITES_PREFIX}${userId}`;
+  const unique = Array.from(new Set(ids.map(id => Number(id)).filter(Number.isFinite)));
+  localStorage.setItem(key, JSON.stringify(unique));
+  return unique;
+}
+
 async function fetchFavorites(userId) {
-  if (!userId) return { favorites: [] };
-  return apiRequest(`/api/favorites?userId=${encodeURIComponent(userId)}`);
+  return { favorites: readFavorites(userId) };
 }
 
 async function addFavoriteApi(userId, recipeId) {
-  return apiRequest('/api/favorites', { method: 'POST', body: { userId, recipeId } });
+  const list = readFavorites(userId);
+  list.push(recipeId);
+  const favorites = writeFavorites(userId, list);
+  return { favorites };
 }
 
 async function removeFavoriteApi(userId, recipeId) {
-  return apiRequest('/api/favorites', { method: 'DELETE', body: { userId, recipeId } });
+  const list = readFavorites(userId).filter(id => Number(id) !== Number(recipeId));
+  const favorites = writeFavorites(userId, list);
+  return { favorites };
 }
 
 async function updateUserApi(id, payload) {
