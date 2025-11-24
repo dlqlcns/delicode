@@ -72,7 +72,21 @@
   </main>
 
   <script src="/js/apiClient.js"></script>
+  <!-- Supabase JS -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://wskxzuzyxnsywmyqeppt.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indza3h6dXp5eG5zeXdteXFlcHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3OTIwNjQsImV4cCI6MjA3OTM2ODA2NH0.agQ6ULpbq-sivR26yITw2cxhiNF1an5xd0ytRXLfwU0"
+    );
+
+  // 🔹 Google 로그인 실행
+  document.querySelector(".social-btn.google").addEventListener("click", async () => {
+    await supabase.auth.signInWithOAuth({ provider: "google" });
+  });
+  </script>
   <script src="/js/login.js"></script>
 
 </body>
+
 </html>
