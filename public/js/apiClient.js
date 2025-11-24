@@ -39,6 +39,10 @@ async function registerUserApi(payload) {
   return apiRequest('/api/users/register', { method: 'POST', body: payload });
 }
 
+async function upsertSocialUserApi(payload) {
+  return apiRequest('/api/users/social-register', { method: 'POST', body: payload });
+}
+
 async function loginUserApi(payload) {
   return apiRequest('/api/users/login', { method: 'POST', body: payload });
 }
@@ -167,6 +171,7 @@ window.apiClient = {
   fetchRecipes,
   fetchRecipeDetail,
   registerUserApi,
+  upsertSocialUserApi,
   loginUserApi,
   checkAvailabilityApi,
   fetchFavorites,

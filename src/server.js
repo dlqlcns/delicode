@@ -3,7 +3,7 @@ import { URL } from 'node:url';
 import path from 'node:path';
 import { sendJson, sendError, parseJsonBody, serveStatic, setCorsHeaders } from './httpUtils.js';
 import { getRecipes, getRecipeDetail } from './recipesApi.js';
-import { registerUser, loginUser, checkUserExists, getUser, updateUser } from './usersApi.js';
+import { registerUser, loginUser, checkUserExists, getUser, updateUser, upsertSocialUser } from './usersApi.js';
 import { addFavorite, getFavorites, removeFavorite } from './favoritesApi.js';
 import { getUserIngredients, replaceUserIngredients } from './userIngredientsApi.js';
 
@@ -65,6 +65,17 @@ async function handleUsers(req, res, url) {
     } catch (err) {
       const status = err.status || 500;
       return sendError(res, status, err.message || 'Failed to register user');
+    }
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/users/social-register') {
+    try {
+      const body = await parseJsonBody(req);
+      const user = await upsertSocialUser(body);
+      return sendJson(res, 200, { user });
+    } catch (err) {
+      const status = err.status || 500;
+      return sendError(res, status, err.message || 'Failed to save social user');
     }
   }
 
