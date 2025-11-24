@@ -38,19 +38,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 로그인 상태: 로그아웃 버튼으로 변경
-    if (currentUser) {
-        authBtn.textContent = "로그아웃";
-        authBtn.addEventListener("click", () => {
-            const confirmed = confirm("로그아웃 하시겠습니까?");
-            if (confirmed) {
-                // 유저 정보는 localStorage에 그대로 유지
-                // currentUser만 삭제하여 로그아웃 처리
-                localStorage.removeItem("currentUser");
-                alert("로그아웃 되었습니다.");
-                window.location.href = "index.html";
-            }
-        });
-    } 
+    authBtn.addEventListener("click", async () => {
+      const confirmed = confirm("로그아웃 하시겠습니까?");
+      if (!confirmed) return;
+
+      localStorage.removeItem("currentUser");
+      await supabase.auth.signOut(); // ← Supabase 세션도 종료
+      alert("로그아웃 되었습니다.");
+      window.location.href = "index.html";
+    });
+  } 
     // 로그아웃 상태: 로그인/회원가입 버튼 유지
 
     else {
@@ -73,3 +70,4 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
