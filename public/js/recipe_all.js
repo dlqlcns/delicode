@@ -7,63 +7,6 @@ let allRecipes = [];
 let currentRecipes = [];
 let favoriteIds = new Set();
 
-const SAMPLE_RECIPES = [
-  {
-    id: 1,
-    name: '간장계란밥',
-    description: '바쁜 아침을 위한 초간단 한그릇 요리',
-    image: '/img/recipe_images/ganjang_egg_rice.jpg',
-    category: '한식',
-    time: '10분',
-    bookmarked: false,
-  },
-  {
-    id: 2,
-    name: '토마토 파스타',
-    description: '신선한 토마토가 듬뿍 들어간 클래식 파스타',
-    image: '/img/recipe_images/tomato_pasta.jpg',
-    category: '양식',
-    time: '25분',
-    bookmarked: false,
-  },
-  {
-    id: 3,
-    name: '치킨 가라아게',
-    description: '겉바속촉 일본식 닭튀김',
-    image: '/img/recipe_images/karaage.jpg',
-    category: '일식',
-    time: '30분',
-    bookmarked: false,
-  },
-  {
-    id: 4,
-    name: '새우 팟타이',
-    description: '달콤짭짤한 소스가 매력적인 태국식 볶음 쌀국수',
-    image: '/img/recipe_images/pad_thai.jpg',
-    category: '동남아',
-    time: '20분',
-    bookmarked: false,
-  },
-  {
-    id: 5,
-    name: '시저 샐러드',
-    description: '상큼한 드레싱과 크루통이 어우러진 기본 샐러드',
-    image: '/img/recipe_images/caesar_salad.jpg',
-    category: '샐러드',
-    time: '15분',
-    bookmarked: false,
-  },
-  {
-    id: 6,
-    name: '티라미수',
-    description: '커피 향 가득한 부드러운 이탈리안 디저트',
-    image: '/img/recipe_images/tiramisu.jpg',
-    category: '디저트',
-    time: '40분',
-    bookmarked: false,
-  },
-];
-
 const recipeList = document.getElementById('recipeList');
 const categorySelect = document.getElementById('categorySelect');
 const sortSelect = document.getElementById('sortSelect');
@@ -239,12 +182,7 @@ async function loadRecipes() {
   } catch (err) {
     console.error(err);
     const cached = loadCachedRecipes();
-    if (Array.isArray(cached) && cached.length > 0) {
-      allRecipes = cached;
-    } else {
-      allRecipes = SAMPLE_RECIPES;
-    }
-    cacheRecipes(allRecipes);
+    allRecipes = Array.isArray(cached) ? cached : [];
   }
 
   loadFavorites(allRecipes);

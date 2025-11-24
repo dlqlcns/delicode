@@ -158,15 +158,14 @@ async function loadFavorites() {
 
   favoriteIds = new Set(readFavorites(user.id));
 
-  let recipePool = loadCachedRecipes();
-  if (recipePool.length === 0 && favoriteIds.size > 0) {
-    try {
-      const response = await window.apiClient.fetchRecipes();
-      recipePool = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
-      cacheRecipes(recipePool);
-    } catch (err) {
-      console.error(err);
-    }
+  let recipePool = [];
+  try {
+    const response = await window.apiClient.fetchRecipes();
+    recipePool = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
+    cacheRecipes(recipePool);
+  } catch (err) {
+    console.error(err);
+    recipePool = loadCachedRecipes();
   }
 
   recipesById = new Map((recipePool || []).map(r => [Number(r.id), { ...r, bookmarked: favoriteIds.has(Number(r.id)) }]));
