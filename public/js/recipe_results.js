@@ -29,9 +29,9 @@ async function syncFavorites() {
 
   try {
     const response = await window.apiClient.fetchFavorites(user.id);
-    favoriteIds = new Set(response.favorites || []);
+    favoriteIds = new Set((response.favorites || []).map(String));
     currentRecipes.forEach(recipe => {
-      recipe.bookmarked = favoriteIds.has(recipe.id);
+      recipe.bookmarked = favoriteIds.has(String(recipe.id));
     });
   } catch (err) {
     console.error(err);
@@ -199,14 +199,14 @@ async function toggleBookmark(id, isActive) {
     const response = isActive
       ? await window.apiClient.addFavoriteApi(user.id, id)
       : await window.apiClient.removeFavoriteApi(user.id, id);
-    favoriteIds = new Set(response.favorites || []);
+    favoriteIds = new Set((response.favorites || []).map(String));
     currentRecipes.forEach(recipe => {
-      recipe.bookmarked = favoriteIds.has(recipe.id);
+      recipe.bookmarked = favoriteIds.has(String(recipe.id));
     });
     renderRecipes(currentRecipes);
 
-    const target = currentRecipes.find(r => r.id === id);
-    if (favoriteIds.has(id)) {
+    const target = currentRecipes.find(r => String(r.id) === String(id));
+    if (favoriteIds.has(String(id))) {
       showToastNotification(
         `${target?.name || '레시피'}가 즐겨찾기에 추가되었습니다.`,
         '즐겨찾기 보기',

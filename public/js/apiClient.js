@@ -69,7 +69,13 @@ const FAVORITES_PREFIX = 'favorites_user_';
 const inMemoryFavorites = new Map();
 
 function normalizeIds(ids) {
-  return Array.from(new Set(ids.map(id => Number(id)).filter(Number.isFinite)));
+  return Array.from(
+    new Set(
+      ids
+        .map(id => String(id).trim())
+        .filter(Boolean),
+    ),
+  );
 }
 
 function readFavorites(userId) {
@@ -115,7 +121,7 @@ async function addFavoriteApi(userId, recipeId) {
   if (!userId || !recipeId) throw new Error('userId와 recipeId가 필요합니다.');
 
   const current = new Set(readFavorites(userId));
-  current.add(Number(recipeId));
+  current.add(String(recipeId));
   const favorites = writeFavorites(userId, Array.from(current));
   return { favorites };
 }
@@ -124,7 +130,7 @@ async function removeFavoriteApi(userId, recipeId) {
   if (!userId || !recipeId) throw new Error('userId와 recipeId가 필요합니다.');
 
   const current = new Set(readFavorites(userId));
-  current.delete(Number(recipeId));
+  current.delete(String(recipeId));
   const favorites = writeFavorites(userId, Array.from(current));
   return { favorites };
 }
