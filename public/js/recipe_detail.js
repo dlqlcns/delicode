@@ -47,9 +47,6 @@ function renderRecipeDetail(recipe) {
                 const stepItem = document.createElement('div');
                 stepItem.className = 'recipe-step-item';
 
-                const stepImage = document.createElement('div');
-                stepImage.className = 'step-image-box';
-
                 const stepContent = document.createElement('div');
                 stepContent.className = 'step-content';
 
@@ -59,7 +56,7 @@ function renderRecipeDetail(recipe) {
 
                 const stepTitle = document.createElement('h3');
                 stepTitle.className = 'step-title';
-                stepTitle.textContent = `Step ${order}`;
+                stepTitle.textContent = `단계 ${order}`;
 
                 const stepDescription = document.createElement('p');
                 stepDescription.className = 'step-description';
@@ -69,7 +66,6 @@ function renderRecipeDetail(recipe) {
                 stepContent.appendChild(stepTitle);
                 stepContent.appendChild(stepDescription);
 
-                stepItem.appendChild(stepImage);
                 stepItem.appendChild(stepContent);
 
                 stepsContainer.appendChild(stepItem);

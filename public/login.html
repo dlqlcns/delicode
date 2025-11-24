@@ -52,17 +52,17 @@
         </div>
 
         <div class="social-buttons">
-          <button class="social-btn google" type="button">
+          <button class="social-btn.google" type="button">
             <img src="/img/icons/google.png" alt="Google" />
             <span>Google 로그인</span>
           </button>
 
-          <button class="social-btn naver" type="button">
+          <button class="social-btn.naver" type="button">
             <img src="/img/icons/naver.png" alt="Naver" />
             <span>네이버 로그인</span>
           </button>
 
-          <button class="social-btn kakao" type="button">
+          <button class="social-btn.kakao" type="button">
             <img src="/img/icons/kakao.png" alt="Kakao" />
             <span>카카오 로그인</span>
           </button>
@@ -72,7 +72,22 @@
   </main>
 
   <script src="/js/apiClient.js"></script>
+  <!-- Supabase JS -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      "https://wskxzuzyxnsywmyqeppt.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indza3h6dXp5eG5zeXdteXFlcHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3OTIwNjQsImV4cCI6MjA3OTM2ODA2NH0.agQ6ULpbq-sivR26yITw2cxhiNF1an5xd0ytRXLfwU0"
+    );
+
+  // 🔹 Google 로그인 실행
+  document.querySelector(".social-btn.google").addEventListener("click", async () => {
+    await supabase.auth.signInWithOAuth({ provider: "google" });
+  });
+  </script>
   <script src="/js/login.js"></script>
 
 </body>
+
 </html>
+
