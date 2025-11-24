@@ -1,6 +1,9 @@
 import { buildQuery, supabaseRequest } from './supabaseClient.js';
 import { hashPassword, verifyPassword } from './password.js';
 
+const PUBLIC_USERS_PATH = '/public-users';
+const AUTH_USERS_PATH = '/auth-users';
+
 function sanitizeUser(user) {
   if (!user) return null;
   const { password_hash, ...safe } = user;
@@ -24,7 +27,7 @@ async function checkUserExists({ username, email, excludeId }) {
     limit: 1,
   });
 
-  const rows = await supabaseRequest(`/users${query}`);
+  const rows = await supabaseRequest(`${PUBLIC_USERS_PATH}${query}`);
   return rows;
 }
 
@@ -51,7 +54,7 @@ async function registerUser(payload) {
     allergies: Array.isArray(allergies) ? allergies : [],
     ingredients: Array.isArray(ingredients) ? ingredients : [],
   }];
-  const data = await supabaseRequest('/users', {
+  const data = await supabaseRequest(PUBLIC_USERS_PATH, {
     method: 'POST',
     body: insertBody,
     prefer: 'return=representation',
@@ -71,7 +74,7 @@ async function loginUser({ identifier, password }) {
     select: 'id,username,email,password_hash,allergies,ingredients,created_at',
     or: `(email.eq.${identifier},username.eq.${identifier})`,
   });
-  const users = await supabaseRequest(`/users${query}`);
+  const users = await supabaseRequest(`${PUBLIC_USERS_PATH}${query}`);
   const user = users[0];
   if (!user || !verifyPassword(user.password_hash, password)) {
     const error = new Error('등록되지 않은 아이디이거나 아이디 또는 비밀번호를 잘못 입력했습니다.');
@@ -88,7 +91,7 @@ async function getUser(id) {
     select: 'id,username,email,allergies,ingredients,created_at',
     id: `eq.${id}`,
   });
-  const rows = await supabaseRequest(`/users${query}`);
+  const rows = await supabaseRequest(`${PUBLIC_USERS_PATH}${query}`);
   return sanitizeUser(rows[0]);
 }
 
@@ -131,7 +134,7 @@ async function updateUser(id, payload) {
   }
 
   const query = buildQuery({ id: `eq.${id}` });
-  const data = await supabaseRequest(`/users${query}`, {
+  const data = await supabaseRequest(`${PUBLIC_USERS_PATH}${query}`, {
     method: 'PATCH',
     body: updates,
     prefer: 'return=representation',
@@ -160,7 +163,14 @@ async function upsertSocialUser(payload) {
   ];
 
   const query = buildQuery({ on_conflict: 'id' });
-  const data = await supabaseRequest(`/users${query}`, {
+
+  await supabaseRequest(`${AUTH_USERS_PATH}${query}`, {
+    method: 'POST',
+    body: insertBody,
+    prefer: 'resolution=merge-duplicates',
+  });
+
+  const data = await supabaseRequest(`${PUBLIC_USERS_PATH}${query}`, {
     method: 'POST',
     body: insertBody,
     prefer: 'return=representation,resolution=merge-duplicates',
