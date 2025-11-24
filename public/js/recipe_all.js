@@ -20,6 +20,24 @@ function getCurrentUser() {
   }
 }
 
+function getUserAllergies() {
+  const user = getCurrentUser();
+  return Array.isArray(user?.allergies)
+    ? user.allergies.filter(value => value && value.trim().length > 0)
+    : [];
+}
+
+function updateSubtitle(allergies) {
+  const subtitleEl = document.querySelector('.all-recipes-subtitle');
+  if (!subtitleEl) return;
+
+  if (allergies.length) {
+    subtitleEl.textContent = `알레르기 재료(${allergies.join(', ')})가 포함된 레시피는 자동으로 제외했습니다.`;
+  } else {
+    subtitleEl.textContent = '취향에 맞는 레시피를 찾아보세요.';
+  }
+}
+
 async function loadFavorites(recipes) {
   const user = getCurrentUser();
   if (!user) {
@@ -129,7 +147,12 @@ function applyFilters() {
 
 async function loadRecipes() {
   try {
-    const response = await window.apiClient.fetchRecipes();
+    const allergies = getUserAllergies();
+    updateSubtitle(allergies);
+
+    const response = await window.apiClient.fetchRecipes({
+      exclude: allergies.join(','),
+    });
     allRecipes = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
     await loadFavorites(allRecipes);
     currentRecipes = [...allRecipes];
