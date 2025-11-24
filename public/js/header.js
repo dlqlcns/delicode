@@ -1,73 +1,82 @@
 // header.js - 로그인 상태에 따라 header 버튼 업데이트
 
-// =======================
-// 🔥 Supabase 로그인 체크 추가
-// =======================
+const SUPABASE_URL = "https://wskxzuzyxnsywmyqeppt.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indza3h6dXp5eG5zeXdteXFlcHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3OTIwNjQsImV4cCI6MjA3OTM2ODA2NH0.agQ6ULpbq-sivR26yITw2cxhiNF1an5xd0ytRXLfwU0";
+
+let supabaseClient = null;
+
+// Supabase SDK가 없다면 건너뛰고, 있다면 클라이언트를 만들어 둔다.
+if (window.supabase) {
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
 async function syncSupabaseUserToLocal() {
-  const { data } = await supabase.auth.getUser();
+  if (!supabaseClient) return null;
+  const { data } = await supabaseClient.auth.getUser();
   const supaUser = data?.user;
   if (!supaUser) return null;
 
-  // users 테이블에서 상세 정보 조회
-  const { data: rows } = await supabase.from("users").select("*").eq("id", supaUser.id);
+  const { data: rows } = await supabaseClient
+    .from("users")
+    .select("*")
+    .eq("id", supaUser.id);
   if (!rows || rows.length === 0) return null;
 
   localStorage.setItem("currentUser", JSON.stringify(rows[0]));
   return rows[0];
 }
+
+// Supabase와 로컬 스토리지 동기화 시도
 syncSupabaseUserToLocal();
 
 document.addEventListener("DOMContentLoaded", () => {
-    const authBtn = document.getElementById("authBtn");
-    const headerSearchInput = document.getElementById('headerSearchInput');
-    const headerSearchIcon = document.getElementById('headerSearchIcon');
+  const authBtn = document.getElementById("authBtn");
+  const headerSearchInput = document.getElementById("headerSearchInput");
+  const headerSearchIcon = document.getElementById("headerSearchIcon");
 
-    if (!authBtn) return;
+  if (!authBtn) return;
 
-    // ✅ JSON 파싱 시도 + null/빈 문자열 체크
-    let currentUser = null;
-    try {
-        const userData = localStorage.getItem("currentUser");
-        // null, "null", "", undefined 모두 걸러냄
-        if (userData && userData !== "null" && userData !== "undefined") {
-            currentUser = JSON.parse(userData);
-        }
-    } catch (e) {
-        // JSON 파싱 실패 시 null로 처리
-        currentUser = null;
+  let currentUser = null;
+  try {
+    const userData = localStorage.getItem("currentUser");
+    if (userData && userData !== "null" && userData !== "undefined") {
+      currentUser = JSON.parse(userData);
     }
+  } catch (e) {
+    currentUser = null;
+  }
 
-    // 로그인 상태: 로그아웃 버튼으로 변경
+  if (currentUser) {
+    authBtn.textContent = "로그아웃";
     authBtn.addEventListener("click", async () => {
       const confirmed = confirm("로그아웃 하시겠습니까?");
       if (!confirmed) return;
 
       localStorage.removeItem("currentUser");
-      await supabase.auth.signOut(); // ← Supabase 세션도 종료
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+      }
       alert("로그아웃 되었습니다.");
-      window.location.href = "index.html";
+      window.location.href = "/index.html";
     });
-  } 
-    // 로그아웃 상태: 로그인/회원가입 버튼 유지
+  } else {
+    authBtn.textContent = "로그인 / 회원가입";
+    authBtn.addEventListener("click", () => {
+      window.location.href = "/login.html";
+    });
+  }
 
-    else {
-        authBtn.textContent = "로그인 / 회원가입";
-        authBtn.addEventListener("click", () => {
-            window.location.href = "login.html";
-        });
-    }
-
-    if (headerSearchInput) {
-        headerSearchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (typeof handleSearch === 'function') {
-                    handleSearch();
-                } else if (headerSearchIcon) {
-                    headerSearchIcon.click();
-                }
-            }
-        });
-    }
+  if (headerSearchInput) {
+    headerSearchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (typeof handleSearch === "function") {
+          handleSearch();
+        } else if (headerSearchIcon) {
+          headerSearchIcon.click();
+        }
+      }
+    });
+  }
 });
-
