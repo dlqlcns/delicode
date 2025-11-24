@@ -38,3 +38,24 @@ async function handleLogin(event) {
 if (loginForm) {
     loginForm.addEventListener('submit', handleLogin);
 }
+
+// ===============================
+// 🔥 Google 로그인 후 자동 처리
+// ===============================
+document.addEventListener("DOMContentLoaded", async () => {
+  const { data } = await supabase.auth.getUser();
+  const user = data?.user;
+  if (!user) return;
+
+  // users 테이블에 정보 있는지 확인
+  const { data: rows } = await supabase.from("users").select("*").eq("id", user.id);
+
+  // users 테이블에 없다 → 추가 정보 입력 페이지 이동
+  if (!rows || rows.length === 0) {
+    return (window.location.href = "/profile/register.html");
+  }
+
+  // 있다 → 로그인 유지 및 메인 이동
+  localStorage.setItem("currentUser", JSON.stringify(rows[0]));
+  window.location.href = "/index.html";
+});
