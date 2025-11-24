@@ -10,6 +10,28 @@ const categoryContainer = document.getElementById("categoryContainer");
 let supabaseClient = null;
 let authUser = null;
 
+async function ensureAuthSession() {
+  const client = await ensureSupabaseClient();
+
+  const searchParams = new URLSearchParams(window.location.search || '');
+  const hash = window.location.hash?.replace(/^#/, '') || '';
+  const hashParams = new URLSearchParams(hash);
+  const code = searchParams.get('code') || hashParams.get('code');
+
+  if (!code) return;
+
+  const { error } = await client.auth.exchangeCodeForSession(code);
+  if (!error) {
+    const cleanedParams = new URLSearchParams(window.location.search || '');
+    cleanedParams.delete('code');
+    cleanedParams.delete('state');
+    const suffix = cleanedParams.toString();
+    history.replaceState(null, '', `${window.location.pathname}${suffix ? `?${suffix}` : ''}`);
+  } else {
+    console.warn('Supabase OAuth code exchange failed', error);
+  }
+}
+
 function getCheckedValues(container) {
   if (!container) return [];
   return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(
@@ -30,6 +52,7 @@ async function ensureSupabaseClient() {
 
 async function loadAuthUser() {
   const client = await ensureSupabaseClient();
+  await ensureAuthSession();
   const { data, error } = await client.auth.getUser();
   if (error || !data?.user) {
     alert("로그인 정보를 확인할 수 없습니다. 다시 로그인해주세요.");

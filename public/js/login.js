@@ -43,12 +43,44 @@ if (loginForm) {
 // 🔥 Google 로그인 후 자동 처리
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
+  async function ensureSupabaseSession() {
+    if (!window.supabase || !window.supabase.auth) return;
+
+    const searchParams = new URLSearchParams(window.location.search || '');
+    const hash = window.location.hash?.replace(/^#/, '') || '';
+    const hashParams = new URLSearchParams(hash);
+
+    const code = searchParams.get('code') || hashParams.get('code');
+
+    if (!code) return;
+
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      const cleanedParams = new URLSearchParams(window.location.search || '');
+      cleanedParams.delete('code');
+      cleanedParams.delete('state');
+      const suffix = cleanedParams.toString();
+      history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${suffix ? `?${suffix}` : ''}`
+      );
+    } else {
+      console.warn('Supabase OAuth code exchange failed', error);
+    }
+  }
+
+  await ensureSupabaseSession();
+
   const { data } = await supabase.auth.getUser();
   const user = data?.user;
   if (!user) return;
 
   // users 테이블에 정보 있는지 확인
-  const { data: rows } = await supabase.from("users").select("*").eq("id", user.id);
+  const { data: rows } = await supabase
+    .from("public-users")
+    .select("*")
+    .eq("id", user.id);
 
   // users 테이블에 없다 → 추가 정보 입력 페이지 이동
   if (!rows || rows.length === 0) {

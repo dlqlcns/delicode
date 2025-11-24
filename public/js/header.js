@@ -18,7 +18,7 @@ async function syncSupabaseUserToLocal() {
   if (!supaUser) return null;
 
   const { data: rows } = await supabaseClient
-    .from("users")
+    .from("public-users")
     .select("*")
     .eq("id", supaUser.id);
   if (!rows || rows.length === 0) return null;
