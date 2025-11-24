@@ -45,12 +45,12 @@ async function handleBookmarkClick(id, isActive) {
       ? await window.apiClient.addFavoriteApi(user.id, id)
       : await window.apiClient.removeFavoriteApi(user.id, id);
 
-    favoriteIds = new Set(response.favorites || []);
-    recipes = recipes.map(r => ({ ...r, bookmarked: favoriteIds.has(r.id) }));
+    favoriteIds = new Set((response.favorites || []).map(String));
+    recipes = recipes.map(r => ({ ...r, bookmarked: favoriteIds.has(String(r.id)) }));
     renderRecipeCards();
 
-    const target = recipes.find(r => r.id === id);
-    if (favoriteIds.has(id)) {
+    const target = recipes.find(r => String(r.id) === String(id));
+    if (favoriteIds.has(String(id))) {
       showToastNotification(
         `${target?.name || '레시피'}가 즐겨찾기에 추가되었습니다.`,
         '즐겨찾기 보기',
@@ -72,10 +72,10 @@ async function loadRecommendedRecipes() {
     const response = await window.apiClient.fetchRecipes({ limit: 5 });
     const user = getCurrentUser();
     const favoritesResponse = user ? await window.apiClient.fetchFavorites(user.id) : { favorites: [] };
-    favoriteIds = new Set(favoritesResponse.favorites || []);
+    favoriteIds = new Set((favoritesResponse.favorites || []).map(String));
     recipes = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards).map(r => ({
       ...r,
-      bookmarked: favoriteIds.has(r.id),
+      bookmarked: favoriteIds.has(String(r.id)),
     }));
     renderRecipeCards();
     if (status) status.textContent = recipes.length ? '' : '표시할 레시피가 없습니다.';

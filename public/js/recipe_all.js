@@ -30,9 +30,9 @@ async function loadFavorites(recipes) {
 
   try {
     const response = await window.apiClient.fetchFavorites(user.id);
-    favoriteIds = new Set(response.favorites || []);
+    favoriteIds = new Set((response.favorites || []).map(String));
     recipes.forEach(recipe => {
-      recipe.bookmarked = favoriteIds.has(recipe.id);
+      recipe.bookmarked = favoriteIds.has(String(recipe.id));
     });
   } catch (err) {
     console.error(err);
@@ -61,7 +61,7 @@ async function onBookmarkClicked(id, isActive) {
   const user = getCurrentUser();
   if (!user) return;
 
-  const idx = allRecipes.findIndex(x => x.id === id);
+  const idx = allRecipes.findIndex(x => String(x.id) === String(id));
   if (idx < 0) return;
 
   try {
@@ -69,21 +69,22 @@ async function onBookmarkClicked(id, isActive) {
       ? await window.apiClient.addFavoriteApi(user.id, id)
       : await window.apiClient.removeFavoriteApi(user.id, id);
 
-    favoriteIds = new Set(response.favorites || []);
-    allRecipes[idx].bookmarked = favoriteIds.has(id);
+    favoriteIds = new Set((response.favorites || []).map(String));
+    allRecipes[idx].bookmarked = favoriteIds.has(String(id));
 
     if (sortSelect && sortSelect.value === '인기순') {
       applyFilters();
     } else {
       const btn = document.querySelector(`.bookmark-btn[data-bookmark-id="${id}"]`);
       if (btn) {
-        btn.textContent = favoriteIds.has(id) ? '♥' : '♡';
-        btn.classList.toggle('active', favoriteIds.has(id));
+        const isBookmarked = favoriteIds.has(String(id));
+        btn.textContent = isBookmarked ? '♥' : '♡';
+        btn.classList.toggle('active', isBookmarked);
       }
     }
 
     const recipeName = allRecipes[idx].name;
-    if (favoriteIds.has(id)) {
+    if (favoriteIds.has(String(id))) {
       showToastNotification(
         `"${recipeName}"이(가) 즐겨찾기에 추가되었습니다.`,
         '이동',

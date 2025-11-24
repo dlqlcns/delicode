@@ -69,7 +69,13 @@ const FAVORITES_PREFIX = 'favorites_user_';
 const inMemoryFavorites = new Map();
 
 function normalizeIds(ids) {
-  return Array.from(new Set(ids.map(id => Number(id)).filter(Number.isFinite)));
+  return Array.from(
+    new Set(
+      ids
+        .map(id => String(id).trim())
+        .filter(Boolean),
+    ),
+  );
 }
 
 function readFavorites(userId) {
@@ -107,38 +113,25 @@ function writeFavorites(userId, ids) {
 async function fetchFavorites(userId) {
   if (!userId) return { favorites: [] };
 
-  try {
-    const query = new URLSearchParams({ userId });
-    const response = await apiRequest(`/api/favorites?${query.toString()}`);
-    const favorites = writeFavorites(userId, response.favorites || []);
-    return { favorites };
-  } catch (err) {
-    console.warn('즐겨찾기 정보를 서버에서 불러오지 못했습니다. 로컬 저장 데이터를 사용합니다.', err);
-    return { favorites: readFavorites(userId) };
-  }
+  const favorites = readFavorites(userId);
+  return { favorites };
 }
 
 async function addFavoriteApi(userId, recipeId) {
   if (!userId || !recipeId) throw new Error('userId와 recipeId가 필요합니다.');
 
-  const response = await apiRequest('/api/favorites', {
-    method: 'POST',
-    body: { userId, recipeId },
-  });
-
-  const favorites = writeFavorites(userId, response.favorites || []);
+  const current = new Set(readFavorites(userId));
+  current.add(String(recipeId));
+  const favorites = writeFavorites(userId, Array.from(current));
   return { favorites };
 }
 
 async function removeFavoriteApi(userId, recipeId) {
   if (!userId || !recipeId) throw new Error('userId와 recipeId가 필요합니다.');
 
-  const response = await apiRequest('/api/favorites', {
-    method: 'DELETE',
-    body: { userId, recipeId },
-  });
-
-  const favorites = writeFavorites(userId, response.favorites || []);
+  const current = new Set(readFavorites(userId));
+  current.delete(String(recipeId));
+  const favorites = writeFavorites(userId, Array.from(current));
   return { favorites };
 }
 

@@ -33,7 +33,7 @@ async function loadFavorites() {
 
   try {
     const { favorites } = await window.apiClient.fetchFavorites(user.id);
-    favoriteIds = new Set(favorites || []);
+    favoriteIds = new Set((favorites || []).map(String));
 
     if (favoriteIds.size === 0) {
       recipesById = new Map();
@@ -45,7 +45,7 @@ async function loadFavorites() {
     const recipeResponse = await window.apiClient.fetchRecipes({ ids: [...favoriteIds].join(',') });
     recipesById = new Map((recipeResponse.recipes || []).map(r => {
       const normalized = window.apiClient.normalizeRecipeForCards(r);
-      return [normalized.id, { ...normalized, bookmarked: true }];
+      return [String(normalized.id), { ...normalized, bookmarked: true }];
     }));
 
     filterRecipes();
@@ -146,8 +146,8 @@ async function onBookmarkClicked(id) {
 
   try {
     await window.apiClient.removeFavoriteApi(user.id, id);
-    favoriteIds.delete(id);
-    recipesById.delete(id);
+    favoriteIds.delete(String(id));
+    recipesById.delete(String(id));
     filterRecipes();
     showToastNotification('즐겨찾기에서 해제되었습니다.');
   } catch (err) {
@@ -157,7 +157,7 @@ async function onBookmarkClicked(id) {
 }
 
 function filterRecipes() {
-    let filtered = [...recipesById.values()].filter(recipe => favoriteIds.has(recipe.id));
+    let filtered = [...recipesById.values()].filter(recipe => favoriteIds.has(String(recipe.id)));
     
     const selectedCategory = categorySelect?.value || '전체';
     const sortOption = sortSelect?.value || '최신순';
