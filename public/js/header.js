@@ -1,5 +1,22 @@
 // header.js - 로그인 상태에 따라 header 버튼 업데이트
 
+// =======================
+// 🔥 Supabase 로그인 체크 추가
+// =======================
+async function syncSupabaseUserToLocal() {
+  const { data } = await supabase.auth.getUser();
+  const supaUser = data?.user;
+  if (!supaUser) return null;
+
+  // users 테이블에서 상세 정보 조회
+  const { data: rows } = await supabase.from("users").select("*").eq("id", supaUser.id);
+  if (!rows || rows.length === 0) return null;
+
+  localStorage.setItem("currentUser", JSON.stringify(rows[0]));
+  return rows[0];
+}
+syncSupabaseUserToLocal();
+
 document.addEventListener("DOMContentLoaded", () => {
     const authBtn = document.getElementById("authBtn");
     const headerSearchInput = document.getElementById('headerSearchInput');
@@ -35,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     } 
     // 로그아웃 상태: 로그인/회원가입 버튼 유지
+
     else {
         authBtn.textContent = "로그인 / 회원가입";
         authBtn.addEventListener("click", () => {
