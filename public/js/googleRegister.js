@@ -55,31 +55,26 @@ async function saveUserProfile(event) {
 
   const allergies = getCheckedValues(allergyContainer);
   const ingredients = getCheckedValues(categoryContainer);
+  try {
+    const response = await window.apiClient.upsertSocialUserApi({
+      id: authUser.id,
+      username: displayName,
+      email: authUser.email,
+      allergies,
+      ingredients,
+    });
 
-  const payload = [{
-    id: authUser.id,
-    username: displayName,
-    email: authUser.email,
-    allergies,
-    ingredients,
-  }];
+    const savedUser = response?.user;
+    if (savedUser) {
+      localStorage.setItem("currentUser", JSON.stringify(savedUser));
+    }
 
-  const client = await ensureSupabaseClient();
-  const { data, error } = await client
-    .from("users")
-    .upsert(payload, { onConflict: "id" })
-    .select()
-    .single();
-
-  if (error) {
-    console.error(error);
-    alert("추가 정보 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    return;
+    alert("추가 정보가 저장되었습니다. 메인 페이지로 이동합니다.");
+    window.location.href = "/index.html";
+  } catch (err) {
+    console.error(err);
+    alert(err.message || "추가 정보 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
   }
-
-  localStorage.setItem("currentUser", JSON.stringify(data));
-  alert("추가 정보가 저장되었습니다. 메인 페이지로 이동합니다.");
-  window.location.href = "/index.html";
 }
 
 (async function init() {

@@ -140,4 +140,33 @@ async function updateUser(id, payload) {
   return sanitizeUser(data[0]);
 }
 
-export { registerUser, loginUser, checkUserExists, getUser, updateUser };
+async function upsertSocialUser(payload) {
+  const { id, username, email, allergies = [], ingredients = [] } = payload;
+
+  if (!id || !username || !email) {
+    const error = new Error('id, username, and email are required');
+    error.status = 400;
+    throw error;
+  }
+
+  const insertBody = [
+    {
+      id,
+      username,
+      email,
+      allergies: Array.isArray(allergies) ? allergies : [],
+      ingredients: Array.isArray(ingredients) ? ingredients : [],
+    },
+  ];
+
+  const query = buildQuery({ on_conflict: 'id' });
+  const data = await supabaseRequest(`/users${query}`, {
+    method: 'POST',
+    body: insertBody,
+    prefer: 'return=representation,resolution=merge-duplicates',
+  });
+
+  return sanitizeUser(data[0]);
+}
+
+export { registerUser, loginUser, checkUserExists, getUser, updateUser, upsertSocialUser };
