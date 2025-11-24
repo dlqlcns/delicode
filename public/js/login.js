@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // users 테이블에 없다 → 추가 정보 입력 페이지 이동
   if (!rows || rows.length === 0) {
-    return (window.location.href = "/profile/join.html");
+    return (window.location.href = "/join.html");
   }
 
   // 있다 → 로그인 유지 및 메인 이동
