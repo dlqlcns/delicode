@@ -19,6 +19,13 @@ function getCurrentUser() {
   }
 }
 
+function getUserAllergies() {
+  const user = getCurrentUser();
+  return Array.isArray(user?.allergies)
+    ? user.allergies.filter(value => value && value.trim().length > 0)
+    : [];
+}
+
 async function syncFavorites() {
   const user = getCurrentUser();
   if (!user) {
@@ -138,12 +145,14 @@ function renderRecipes(recipes) {
 
   const urlParams = new URLSearchParams(window.location.search);
   const excludeString = urlParams.get('exclude') || '';
+  const userAllergies = getUserAllergies();
   const excludeTerms = excludeString.split(',').map(s => s.trim()).filter(Boolean);
+  const mergedExcludes = Array.from(new Set([...excludeTerms, ...userAllergies]));
 
   let subtitle = `총 ${recipes.length}개의 레시피가 검색되었습니다.`;
 
-  if (excludeTerms.length > 0) {
-    subtitle += ` ${excludeTerms.map(t => `"${t}"`).join(', ')} 결과는 제외했습니다.`;
+  if (mergedExcludes.length > 0) {
+    subtitle += ` ${mergedExcludes.map(t => `"${t}"`).join(', ')} 결과는 제외했습니다.`;
   }
 
   resultsSubtitle.textContent = subtitle;
@@ -227,6 +236,12 @@ async function loadResults() {
   const ingredientsParam = params.get('ingredients') || '';
   const categoryParam = params.get('category') || '';
   const excludeParam = params.get('exclude') || '';
+  const userAllergies = getUserAllergies();
+  const excludeTerms = excludeParam
+    .split(',')
+    .map(term => term.trim())
+    .filter(Boolean);
+  const mergedExclude = Array.from(new Set([...excludeTerms, ...userAllergies]));
 
   if (categorySelect && categoryParam) {
     categorySelect.value = categoryParam;
@@ -239,7 +254,7 @@ async function loadResults() {
       search: query,
       ingredients: ingredientsParam,
       category: categoryParam && categoryParam !== '전체' ? categoryParam : '',
-      exclude: excludeParam,
+      exclude: mergedExclude.join(','),
     });
 
     currentRecipes = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
