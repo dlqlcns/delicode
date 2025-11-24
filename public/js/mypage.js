@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const recipeContainer = document.getElementById('recipeContainer');
   const guardElement = document.getElementById('mypageGuard');
   const contentWrapper = document.getElementById('mypageContent');
+  let currentUserId = null;
+  let favoriteRecipes = [];
+  let favoriteIds = new Set();
 
   function getStoredUser() {
     try {
@@ -96,36 +99,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     recipes.slice(0, 4).forEach(recipe => {
-      const card = document.createElement('a');
-      card.className = 'recipe-mini-card';
-      card.href = `recipe_detail.html?id=${recipe.id}`;
-      card.innerHTML = `
-        <div class="recipe-mini-thumb" style="background-image:url('${recipe.image || recipe.image_url || ''}')"></div>
-        <div class="recipe-mini-body">
-          <h3 class="recipe-mini-title">${recipe.name}</h3>
-          <p class="recipe-mini-meta">${recipe.category || ''} · ${recipe.time || ''}</p>
-        </div>
-      `;
+      const card = createRecipeBlock({ ...recipe, bookmarked: true });
       recipeContainer.appendChild(card);
     });
+
+    attachBookmarkListeners(handleBookmarkToggle);
   }
 
   async function loadFavorites(userId) {
     if (!recipeContainer) return;
+    currentUserId = userId;
     recipeContainer.innerHTML = '<p style="text-align:center;color:#888;width:100%;">즐겨찾기를 불러오는 중...</p>';
     try {
       const { favorites } = await window.apiClient.fetchFavorites(userId);
-      if (!favorites || favorites.length === 0) {
+      favoriteIds = new Set((favorites || []).map(String));
+
+      if (!favoriteIds.size) {
+        favoriteRecipes = [];
         renderFavoritePreview([]);
         return;
       }
 
-      const recipesResponse = await window.apiClient.fetchRecipes({ ids: favorites.join(',') });
-      const recipes = (recipesResponse.recipes || []).map(window.apiClient.normalizeRecipeForCards);
-      renderFavoritePreview(recipes);
+      const recipesResponse = await window.apiClient.fetchRecipes({ ids: [...favoriteIds].join(',') });
+      favoriteRecipes = (recipesResponse.recipes || []).map(window.apiClient.normalizeRecipeForCards).map(r => ({
+        ...r,
+        bookmarked: true,
+      }));
+      renderFavoritePreview(favoriteRecipes);
     } catch (err) {
       console.error(err);
       recipeContainer.innerHTML = '<p style="color:#cc0000;text-align:center;width:100%;">즐겨찾기를 불러오지 못했습니다.</p>';
+    }
+  }
+
+  async function handleBookmarkToggle(recipeId, shouldBookmark) {
+    if (!currentUserId) return;
+
+    try {
+      if (shouldBookmark) {
+        await window.apiClient.addFavoriteApi(currentUserId, recipeId);
+        favoriteIds.add(String(recipeId));
+      } else {
+        await window.apiClient.removeFavoriteApi(currentUserId, recipeId);
+        favoriteIds.delete(String(recipeId));
+        favoriteRecipes = favoriteRecipes.filter(recipe => String(recipe.id) !== String(recipeId));
+      }
+
+      renderFavoritePreview(favoriteRecipes);
+    } catch (err) {
+      console.error(err);
+      showToastNotification('즐겨찾기 상태를 업데이트하지 못했습니다.');
+      await loadFavorites(currentUserId);
     }
   }
 
