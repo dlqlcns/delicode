@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     recipeContainer.innerHTML = '';
 
     if (!recipes.length) {
-      recipeContainer.innerHTML = '<p style="color:#888;text-align:center;width:100%;">즐겨찾기한 레시피가 없습니다.</p>';
+      recipeContainer.innerHTML = '<p class="recipes-status">즐겨찾기한 레시피가 없습니다.</p>';
       return;
     }
 
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadFavorites(userId) {
     if (!recipeContainer) return;
-    recipeContainer.innerHTML = '<p style="text-align:center;color:#888;width:100%;">즐겨찾기를 불러오는 중...</p>';
+    recipeContainer.innerHTML = '<p class="recipes-status">즐겨찾기를 불러오는 중...</p>';
     try {
       const { favorites } = await window.apiClient.fetchFavorites(userId);
       if (!favorites || favorites.length === 0) {
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderFavoritePreview(recipes);
     } catch (err) {
       console.error(err);
-      recipeContainer.innerHTML = '<p style="color:#cc0000;text-align:center;width:100%;">즐겨찾기를 불러오지 못했습니다.</p>';
+      recipeContainer.innerHTML = '<p class="recipes-status error">즐겨찾기를 불러오지 못했습니다.</p>';
     }
   }
 
