@@ -12,13 +12,31 @@ function normalizeRecipe(record) {
 }
 
 async function fetchRecipeIdsByIngredients(terms) {
-  if (!terms.length) return [];
-  const orFilter = terms.map(term => `ingredient.ilike.%${term}%`).join(',');
-  const query = buildQuery({ select: 'recipe_id', or: `(${orFilter})` });
+  const normalizedTerms = terms?.map(term => term.trim()).filter(Boolean) ?? [];
+  if (!normalizedTerms.length) return [];
+
+  const orFilter = normalizedTerms.map(term => `ingredient.ilike.%${term}%`).join(',');
+  const query = buildQuery({ select: 'recipe_id,ingredient', or: `(${orFilter})` });
   const data = await supabaseRequest(`/recipe_ingredients${query}`);
-  const ids = new Set();
-  data.forEach(row => ids.add(row.recipe_id));
-  return [...ids];
+
+  const matchesByRecipe = new Map();
+
+  data.forEach(row => {
+    const ingredient = row.ingredient?.toLowerCase?.() ?? '';
+    const matchedTerms = matchesByRecipe.get(row.recipe_id) ?? new Set();
+
+    normalizedTerms.forEach(term => {
+      if (ingredient.includes(term.toLowerCase())) {
+        matchedTerms.add(term);
+      }
+    });
+
+    matchesByRecipe.set(row.recipe_id, matchedTerms);
+  });
+
+  return [...matchesByRecipe.entries()]
+    .filter(([, termSet]) => termSet.size === normalizedTerms.length)
+    .map(([recipeId]) => recipeId);
 }
 
 async function getRecipes(params) {
