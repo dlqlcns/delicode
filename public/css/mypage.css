@@ -347,6 +347,19 @@ mypage.html (변경된 정보 표시)*/
   width: 100%;
 }
 
+#recipeContainer .recipes-status {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #888;
+  width: 100%;
+  margin: 0;
+  padding: 12px 0;
+}
+
+#recipeContainer .recipes-status.error {
+  color: #cc0000;
+}
+
 /* 각 레시피 카드가 grid 안에서 꽉 차도록 */
 #recipeContainer .recipe-res-block {
   width: 100%;
