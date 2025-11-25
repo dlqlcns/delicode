@@ -97,7 +97,21 @@ function saveRecentSearch(searchTerm) {
   }
   
   localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-  loadRecentSearches(); 
+  loadRecentSearches();
+}
+
+function setupBackButton() {
+  const backButton = document.getElementById('backButton');
+
+  if (!backButton) return;
+
+  backButton.addEventListener('click', () => {
+    if (document.referrer) {
+      window.history.back();
+    } else {
+      window.location.href = '/index.html';
+    }
+  });
 }
 
 // 페이지 로드 시 이벤트 리스너 설정
@@ -112,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // DOM 로드 완료 후 최근 검색어 태그 로드하여 표시
   loadRecentSearches();
+  setupBackButton();
 });
 
 // ========== 헤더 검색 기능 ==========

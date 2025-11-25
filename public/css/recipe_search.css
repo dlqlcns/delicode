@@ -18,6 +18,37 @@
   gap: 2rem;
 }
 
+.back-button {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  color: #333;
+  padding: 0;
+}
+
+.back-icon {
+  width: 24px;
+  height: 24px;
+  opacity: 0.6;
+  fill: currentColor;
+  transition: opacity 0.2s;
+}
+
+.back-text {
+  font-size: 16px;
+  color: #333;
+}
+
+.back-button:hover .back-icon {
+  opacity: 1;
+}
+
 .main-title {
   font-size: 40px;
   font-weight: 800;
