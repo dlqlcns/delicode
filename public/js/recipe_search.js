@@ -97,7 +97,7 @@ function saveRecentSearch(searchTerm) {
   }
   
   localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-  loadRecentSearches(); 
+  loadRecentSearches();
 }
 
 // 페이지 로드 시 이벤트 리스너 설정

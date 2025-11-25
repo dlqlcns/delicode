@@ -9,6 +9,7 @@ let favoriteIds = new Set();
 const recipeList = document.getElementById('recipeList');
 const categorySelect = document.getElementById('categorySelect');
 const sortSelect = document.getElementById('sortSelect');
+const backButton = document.getElementById('backButton');
 
 function getCurrentUser() {
   try {
@@ -24,6 +25,18 @@ function getUserAllergies() {
   return Array.isArray(user?.allergies)
     ? user.allergies.filter(value => value && value.trim().length > 0)
     : [];
+}
+
+function setupBackButton() {
+  if (!backButton) return;
+
+  backButton.addEventListener('click', () => {
+    if (document.referrer) {
+      window.history.back();
+    } else {
+      window.location.href = '/recipe_search.html';
+    }
+  });
 }
 
 async function syncFavorites() {
@@ -284,7 +297,10 @@ if (sortSelect) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', loadResults);
+document.addEventListener('DOMContentLoaded', () => {
+  setupBackButton();
+  loadResults();
+});
 
 const headerSearchInput = document.getElementById('headerSearchInput');
 if (headerSearchInput) {
