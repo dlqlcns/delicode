@@ -11,6 +11,9 @@
 
 /* 뒤로 가기 버튼 */
 .back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background: none;
   border: none;
   font-size: 24px;
@@ -20,14 +23,20 @@
   padding: 0;
 }
 
-.back-button img {
+.back-icon {
   width: 24px;
   height: 24px;
   opacity: 0.6;
+  fill: currentColor;
   transition: opacity 0.2s;
 }
 
-.back-button:hover img {
+.back-text {
+  font-size: 16px;
+  color: #333;
+}
+
+.back-button:hover .back-icon {
   opacity: 1;
 }
 

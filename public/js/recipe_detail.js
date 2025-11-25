@@ -97,4 +97,21 @@ async function loadRecipeDetail() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadRecipeDetail);
+function setupBackButton() {
+    const backButton = document.getElementById('backButton');
+
+    if (backButton) {
+        backButton.addEventListener('click', () => {
+            if (document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = '/recipe_all.html';
+            }
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupBackButton();
+    loadRecipeDetail();
+});
