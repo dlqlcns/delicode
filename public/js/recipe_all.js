@@ -27,6 +27,13 @@ function getUserAllergies() {
     : [];
 }
 
+function getUserPreferredCategories() {
+  const user = getCurrentUser();
+  return Array.isArray(user?.ingredients)
+    ? user.ingredients.map(value => value.trim()).filter(Boolean)
+    : [];
+}
+
 function updateSubtitle(allergies) {
   const subtitleEl = document.querySelector('.all-recipes-subtitle');
   if (!subtitleEl) return;
@@ -141,8 +148,29 @@ function applyFilters() {
       break;
   }
 
-  currentRecipes = filtered;
+  const prioritized = prioritizePreferredCategories(filtered);
+
+  currentRecipes = prioritized;
   renderRecipes();
+}
+
+function prioritizePreferredCategories(recipes) {
+  const preferred = getUserPreferredCategories();
+  if (!preferred.length) return recipes;
+
+  const preferredSet = new Set(preferred);
+  const preferredRecipes = [];
+  const otherRecipes = [];
+
+  recipes.forEach(recipe => {
+    if (preferredSet.has(recipe.category)) {
+      preferredRecipes.push(recipe);
+    } else {
+      otherRecipes.push(recipe);
+    }
+  });
+
+  return [...preferredRecipes, ...otherRecipes];
 }
 
 async function loadRecipes() {

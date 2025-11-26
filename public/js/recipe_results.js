@@ -27,6 +27,13 @@ function getUserAllergies() {
     : [];
 }
 
+function getUserPreferredCategories() {
+  const user = getCurrentUser();
+  return Array.isArray(user?.ingredients)
+    ? user.ingredients.map(value => value.trim()).filter(Boolean)
+    : [];
+}
+
 function setupBackButton() {
   if (!backButton) return;
 
@@ -213,6 +220,25 @@ function sortRecipes(recipes, sortBy) {
   return sorted;
 }
 
+function prioritizePreferredCategories(recipes) {
+  const preferred = getUserPreferredCategories();
+  if (!preferred.length) return recipes;
+
+  const preferredSet = new Set(preferred);
+  const preferredRecipes = [];
+  const otherRecipes = [];
+
+  recipes.forEach(recipe => {
+    if (preferredSet.has(recipe.category)) {
+      preferredRecipes.push(recipe);
+    } else {
+      otherRecipes.push(recipe);
+    }
+  });
+
+  return [...preferredRecipes, ...otherRecipes];
+}
+
 async function toggleBookmark(id, isActive) {
   const user = getCurrentUser();
   if (!user) return;
@@ -273,7 +299,9 @@ async function loadResults() {
     currentRecipes = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
     await syncFavorites();
     const sorted = sortRecipes(currentRecipes, sortSelect ? sortSelect.value : '');
-    renderRecipes(sorted);
+    const prioritized = prioritizePreferredCategories(sorted);
+    currentRecipes = prioritized;
+    renderRecipes(currentRecipes);
   } catch (err) {
     console.error(err);
     if (recipeList) {
@@ -293,7 +321,8 @@ if (categorySelect) {
 if (sortSelect) {
   sortSelect.addEventListener('change', () => {
     const sorted = sortRecipes(currentRecipes, sortSelect.value);
-    renderRecipes(sorted);
+    currentRecipes = prioritizePreferredCategories(sorted);
+    renderRecipes(currentRecipes);
   });
 }
 
