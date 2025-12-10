@@ -5,11 +5,20 @@
 
 let currentRecipes = [];
 let favoriteIds = new Set();
+let userContext = {
+  preferredCategories: [],
+  fridgeItems: [],
+  searchIngredients: [],
+  username: '',
+};
 
 const recipeList = document.getElementById('recipeList');
 const categorySelect = document.getElementById('categorySelect');
 const sortSelect = document.getElementById('sortSelect');
 const backButton = document.getElementById('backButton');
+const aiSuggestionBox = document.getElementById('aiSuggestionBox');
+const aiSuggestionStatus = document.getElementById('aiSuggestionStatus');
+const aiSuggestionBody = document.getElementById('aiSuggestionBody');
 
 function getCurrentUser() {
   try {
@@ -32,6 +41,21 @@ function getUserPreferredCategories() {
   return Array.isArray(user?.ingredients)
     ? user.ingredients.map(value => value.trim()).filter(Boolean)
     : [];
+}
+
+async function getUserFridgeItems() {
+  const user = getCurrentUser();
+  if (!user) return [];
+
+  try {
+    const response = await window.apiClient.fetchUserIngredientsApi(user.id);
+    return Array.isArray(response?.ingredients)
+      ? response.ingredients.map(value => value.trim()).filter(Boolean)
+      : [];
+  } catch (err) {
+    console.error('사용자 재료 불러오기 실패', err);
+    return [];
+  }
 }
 
 function setupBackButton() {
@@ -220,23 +244,35 @@ function sortRecipes(recipes, sortBy) {
   return sorted;
 }
 
-function prioritizePreferredCategories(recipes) {
-  const preferred = getUserPreferredCategories();
-  if (!preferred.length) return recipes;
+function prioritizeForUser(recipes, { preferredCategories = [], fridgeItems = [], searchIngredients = [], username = '' } = {}) {
+  if (!preferredCategories.length && !fridgeItems.length) return recipes;
 
-  const preferredSet = new Set(preferred);
-  const preferredRecipes = [];
-  const otherRecipes = [];
+  const preferredSet = new Set(preferredCategories);
+  const fridgeSet = new Set(fridgeItems.map(item => item.toLowerCase()));
+  const searchedSet = new Set(searchIngredients.map(item => item.toLowerCase()));
+  const sharesFridge = [...searchedSet].some(term => fridgeSet.has(term));
 
-  recipes.forEach(recipe => {
-    if (preferredSet.has(recipe.category)) {
-      preferredRecipes.push(recipe);
-    } else {
-      otherRecipes.push(recipe);
-    }
+  const decorated = recipes.map((recipe, index) => {
+    const scoreCategory = preferredSet.has(recipe.category) ? 2 : 0;
+    const scoreFridge = sharesFridge ? 1 : 0;
+    const personalizedScore = scoreCategory + scoreFridge;
+
+    return {
+      ...recipe,
+      personalizedScore,
+      personalizedMessage: personalizedScore > 0
+        ? `${username || '회원'}님에게 가장 최적의 레시피에요.`
+        : null,
+      _originalIndex: index,
+    };
   });
 
-  return [...preferredRecipes, ...otherRecipes];
+  decorated.sort((a, b) => {
+    if (b.personalizedScore !== a.personalizedScore) return b.personalizedScore - a.personalizedScore;
+    return a._originalIndex - b._originalIndex;
+  });
+
+  return decorated.map(({ _originalIndex, ...rest }) => rest);
 }
 
 async function toggleBookmark(id, isActive) {
@@ -269,12 +305,55 @@ async function toggleBookmark(id, isActive) {
   }
 }
 
+async function loadAiSuggestions({ ingredients = [], exclude = [], preferredCategories = [], fridgeItems = [], username = '' } = {}) {
+  if (!aiSuggestionBox || !aiSuggestionStatus || !aiSuggestionBody) return;
+
+  const hasIngredients = Array.isArray(ingredients) && ingredients.length > 0;
+  if (!hasIngredients) {
+    aiSuggestionBox.hidden = true;
+    return;
+  }
+
+  aiSuggestionBox.hidden = false;
+  aiSuggestionBody.textContent = '';
+  aiSuggestionBody.classList.remove('error');
+  aiSuggestionStatus.textContent = 'Gemini가 맞춤 추천을 준비 중이에요...';
+
+  const combinedIngredients = Array.from(new Set([...(ingredients || []), ...(fridgeItems || [])]));
+  const contextLines = [];
+  if (preferredCategories.length) contextLines.push(`선호 카테고리: ${preferredCategories.join(', ')}`);
+  if (fridgeItems.length) contextLines.push(`보유 재료: ${fridgeItems.join(', ')}`);
+  const question = contextLines.join('\n');
+
+  try {
+    const response = await window.apiClient.fetchAiSuggestions({
+      ingredients: combinedIngredients,
+      exclude,
+      question,
+    });
+
+    aiSuggestionBody.textContent = response?.suggestions || '추천 결과를 불러오지 못했습니다.';
+    aiSuggestionStatus.textContent = `${username || '회원'}님을 위한 제안을 가져왔어요.`;
+  } catch (err) {
+    aiSuggestionStatus.textContent = 'AI 추천을 가져오지 못했습니다.';
+    aiSuggestionBody.textContent = err.message || '잠시 후 다시 시도해 주세요.';
+    aiSuggestionBody.classList.add('error');
+  }
+}
+
 async function loadResults() {
   const params = new URLSearchParams(window.location.search);
   const query = params.get('query') || '';
   const ingredientsParam = params.get('ingredients') || '';
   const categoryParam = params.get('category') || '';
   const excludeParam = params.get('exclude') || '';
+  const searchIngredients = ingredientsParam
+    .split(',')
+    .map(term => term.trim())
+    .filter(Boolean);
+  const user = getCurrentUser();
+  const fridgePromise = getUserFridgeItems();
+  const preferredCategories = getUserPreferredCategories();
   const userAllergies = getUserAllergies();
   const excludeTerms = excludeParam
     .split(',')
@@ -298,10 +377,24 @@ async function loadResults() {
 
     currentRecipes = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
     await syncFavorites();
+    const fridgeItems = await fridgePromise;
+    userContext = {
+      preferredCategories,
+      fridgeItems,
+      searchIngredients,
+      username: user?.username || '',
+    };
     const sorted = sortRecipes(currentRecipes, sortSelect ? sortSelect.value : '');
-    const prioritized = prioritizePreferredCategories(sorted);
+    const prioritized = prioritizeForUser(sorted, userContext);
     currentRecipes = prioritized;
     renderRecipes(currentRecipes);
+    await loadAiSuggestions({
+      ingredients: searchIngredients,
+      exclude: mergedExclude,
+      preferredCategories,
+      fridgeItems,
+      username: user?.username,
+    });
   } catch (err) {
     console.error(err);
     if (recipeList) {
@@ -321,7 +414,7 @@ if (categorySelect) {
 if (sortSelect) {
   sortSelect.addEventListener('change', () => {
     const sorted = sortRecipes(currentRecipes, sortSelect.value);
-    currentRecipes = prioritizePreferredCategories(sorted);
+    currentRecipes = prioritizeForUser(sorted, userContext);
     renderRecipes(currentRecipes);
   });
 }

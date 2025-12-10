@@ -6,6 +6,10 @@ function createRecipeBlock(recipe) {
   const block = document.createElement('article');
   block.className = 'recipe-res-block';
 
+  const badgeHtml = recipe.personalizedMessage
+    ? `<div class="personalized-badge">${recipe.personalizedMessage}</div>`
+    : '';
+
   const safeName = (recipe.name || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -13,6 +17,7 @@ function createRecipeBlock(recipe) {
     .replace(/"/g, '&quot;');
 
   block.innerHTML = `
+      ${badgeHtml}
       <button class="bookmark-btn ${recipe.bookmarked ? 'active' : ''}"
               data-bookmark-id="${recipe.id}" data-recipe-name="${safeName}" aria-label="북마크">
         ${recipe.bookmarked ? '♥' : '♡'}

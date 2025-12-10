@@ -72,6 +72,20 @@
   background: rgba(255, 61, 92, 0.15);
 }
 
+.personalized-badge {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  background: linear-gradient(90deg, #3459ff, #6ee7b7);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 6px 12px rgba(52, 89, 255, 0.35);
+  z-index: 12;
+}
+
 /* ============================================ */
 /* 콘텐츠 */
 /* ============================================ */
