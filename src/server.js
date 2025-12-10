@@ -6,6 +6,7 @@ import { getRecipes, getRecipeDetail } from './recipesApi.js';
 import { registerUser, loginUser, checkUserExists, getUser, updateUser } from './usersApi.js';
 import { addFavorite, getFavorites, removeFavorite } from './favoritesApi.js';
 import { getUserIngredients, replaceUserIngredients } from './userIngredientsApi.js';
+import { generateRecipeSuggestions } from './geminiService.js';
 
 const PORT = process.env.PORT || 3000;
 const publicDir = path.join(process.cwd(), 'public');
@@ -196,6 +197,41 @@ async function handleFavorites(req, res, url) {
   return notFound(res);
 }
 
+function parseListParam(value = '') {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map(term => term.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+async function handleAi(req, res, url) {
+  if (req.method === 'POST' && url.pathname === '/api/ai/suggestions') {
+    try {
+      const body = await parseJsonBody(req);
+      const ingredients = parseListParam(body.ingredients);
+      const exclude = parseListParam(body.exclude);
+      const question = typeof body.question === 'string' ? body.question : '';
+
+      const suggestions = await generateRecipeSuggestions({
+        ingredients,
+        exclude,
+        question,
+      });
+
+      return sendJson(res, 200, { suggestions });
+    } catch (err) {
+      const status = err.status || 500;
+      return sendError(res, status, err.message || 'AI 추천을 불러오지 못했습니다.');
+    }
+  }
+
+  return notFound(res);
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
@@ -216,6 +252,10 @@ const server = http.createServer(async (req, res) => {
 
   if (url.pathname.startsWith('/api/favorites')) {
     return handleFavorites(req, res, url);
+  }
+
+  if (url.pathname.startsWith('/api/ai')) {
+    return handleAi(req, res, url);
   }
 
   return serveStatic(publicDir, req, res, url.pathname);

@@ -143,6 +143,10 @@ async function fetchUserApi(id) {
   return apiRequest(`/api/users/${encodeURIComponent(id)}`);
 }
 
+async function fetchAiSuggestions(payload = {}) {
+  return apiRequest('/api/ai/suggestions', { method: 'POST', body: payload });
+}
+
 function normalizeRecipeForCards(recipe) {
   return {
     id: recipe.id,
@@ -169,5 +173,6 @@ window.apiClient = {
   fetchUserApi,
   fetchUserIngredientsApi,
   saveUserIngredientsApi,
+  fetchAiSuggestions,
   normalizeRecipeForCards,
 };

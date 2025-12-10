@@ -1,6 +1,10 @@
 // 메인 입력 필드 변수를 스크립트 최상단에서 정의
 const ingredientInput = document.getElementById('ingredientInput');
 const excludeInput = document.getElementById('excludeInput');
+const aiButton = document.getElementById('aiSuggestButton');
+const aiQuestion = document.getElementById('aiQuestion');
+const aiStatus = document.getElementById('aiStatus');
+const aiResponse = document.getElementById('aiResponse');
 
 // 띄어쓰기를 쉼표로 변환하여 검색어를 정돈하는 함수
 function autoFormatIngredients(event) {
@@ -252,4 +256,50 @@ if (excludeInput) {
       searchButton.click();
     }
   });
+}
+
+function setAiStatus(message, isError = false) {
+  if (!aiStatus) return;
+  aiStatus.hidden = !message;
+  aiStatus.textContent = message || '';
+  aiStatus.style.color = isError ? '#dc2626' : '#2563eb';
+}
+
+async function requestAiSuggestions() {
+  if (!aiButton || !ingredientInput) return;
+
+  autoFormatIngredients({ target: ingredientInput });
+  autoFormatIngredients({ target: excludeInput });
+
+  const ingredients = ingredientInput.value.trim();
+  const exclude = excludeInput?.value.trim() || '';
+  const question = aiQuestion?.value.trim() || '';
+
+  if (!ingredients) {
+    alert('AI 추천을 받으려면 최소 한 가지 재료를 입력해 주세요.');
+    ingredientInput.focus();
+    return;
+  }
+
+  aiButton.disabled = true;
+  aiButton.textContent = 'Gemini 생성 중...';
+  setAiStatus('Gemini가 레시피 아이디어를 준비 중입니다...');
+  if (aiResponse) aiResponse.textContent = '';
+
+  try {
+    const response = await window.apiClient.fetchAiSuggestions({ ingredients, exclude, question });
+    const suggestions = response?.suggestions || 'AI 응답이 도착하지 않았습니다.';
+    if (aiResponse) aiResponse.textContent = suggestions;
+    setAiStatus('AI 추천이 도착했습니다!');
+  } catch (err) {
+    setAiStatus(err.message || 'AI 추천 중 오류가 발생했습니다.', true);
+    if (aiResponse) aiResponse.textContent = '';
+  } finally {
+    aiButton.disabled = false;
+    aiButton.textContent = 'AI 추천 받기';
+  }
+}
+
+if (aiButton) {
+  aiButton.addEventListener('click', requestAiSuggestions);
 }
