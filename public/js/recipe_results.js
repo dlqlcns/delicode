@@ -204,12 +204,6 @@ function renderAiRecipes(recipes) {
   recipes.forEach(recipe => {
     const card = createRecipeBlock({ ...recipe, isAi: true });
 
-    card.addEventListener('click', (e) => {
-      if (!e.target.classList.contains('bookmark-btn')) {
-        window.location.href = `recipe_detail.html?id=${encodeURIComponent(recipe.id)}`;
-      }
-    });
-
     aiRecipeList.appendChild(card);
   });
 
@@ -244,12 +238,6 @@ function renderRecipes(recipes) {
 
   recipes.forEach(recipe => {
     const card = createRecipeBlock(recipe);
-
-    card.addEventListener('click', (e) => {
-      if (!e.target.classList.contains('bookmark-btn')) {
-        window.location.href = `recipe_detail.html?id=${encodeURIComponent(recipe.id)}`;
-      }
-    });
 
     recipeList.appendChild(card);
   });

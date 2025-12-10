@@ -23,7 +23,7 @@ function createRecipeBlock(recipe) {
         ${recipe.bookmarked ? '♥' : '♡'}
       </button>
 
-    <a href="recipe_detail.html?id=${recipe.id}" class="recipe-link">
+    <div class="recipe-link" role="group" aria-label="레시피 카드">
       <div class="recipe-image-box" style="background-image: url('${recipe.image}');"></div>
 
       <div class="recipe-content">
@@ -36,7 +36,7 @@ function createRecipeBlock(recipe) {
           <span>${recipe.time}</span>
         </div>
       </div>
-    </a>
+    </div>
   `;
 
   return block;
