@@ -295,9 +295,6 @@ function prioritizeForUser(recipes, { preferredCategories = [], fridgeItems = []
     return {
       ...recipe,
       personalizedScore,
-      personalizedMessage: personalizedScore > 0
-        ? `${username || '회원'}님에게 가장 최적의 레시피에요.`
-        : recipe.personalizedMessage || null,
       _originalIndex: index,
     };
   });

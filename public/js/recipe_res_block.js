@@ -8,7 +8,6 @@ function createRecipeBlock(recipe) {
 
   const badges = [];
   if (recipe.isAi) badges.push('<div class="ai-badge">AI 추천</div>');
-  if (recipe.personalizedMessage) badges.push(`<div class="personalized-badge">${recipe.personalizedMessage}</div>`);
   const badgeHtml = badges.length ? `<div class="badge-stack">${badges.join('')}</div>` : '';
 
   const safeName = (recipe.name || '')

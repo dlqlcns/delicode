@@ -98,9 +98,6 @@ export async function generateRecipeSuggestions({
 
   const top = scored.slice(0, limit).map(entry => ({
     ...entry.recipe,
-    personalizedMessage: entry.score > 0
-      ? `${username || '회원'}님에게 가장 최적의 레시피에요.`
-      : null,
   }));
 
   return top;
