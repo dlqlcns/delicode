@@ -130,17 +130,20 @@
 
     <section class="video-section">
       <h2 class="section-title">조리 영상</h2>
-      <div class="video-frame-wrapper">
-        <iframe
-          id="recipeVideoFrame"
-          title="유튜브 조리 영상"
-          src=""
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allowfullscreen
-        ></iframe>
+      <div class="video-link-card">
+        <div class="video-link-info">
+          <p class="video-hint" id="recipeVideoHint">레시피 이름으로 유튜브 영상을 찾아볼 수 있어요.</p>
+        </div>
+        <a
+          id="recipeVideoLink"
+          class="video-link-button"
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          유튜브 검색 결과 열기
+        </a>
       </div>
-      <p class="video-hint" id="recipeVideoHint">레시피 이름으로 유튜브 영상을 불러오고 있습니다.</p>
     </section>
 
     <section class="recipe-steps-section">
