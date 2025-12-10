@@ -175,17 +175,18 @@
 /* AI 추천 섹션 */
 /* ============================================ */
 
-.ai-suggestion {
+.ai-recipes {
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 1.25rem 1.5rem;
+  border-radius: 14px;
+  padding: 1.5rem;
   background: #f8fafc;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.ai-suggestion__header {
+.ai-recipes__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -193,36 +194,40 @@
   flex-wrap: wrap;
 }
 
-.ai-suggestion__title {
-  font-size: 18px;
+.ai-recipes__eyebrow {
+  font-size: 12px;
   font-weight: 800;
-  color: #111827;
+  letter-spacing: 0.02em;
+  color: #2563eb;
+  margin: 0 0 4px 0;
 }
 
-.ai-suggestion__hint {
+.ai-recipes__title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.ai-recipes__hint {
   color: #6b7280;
   font-size: 14px;
-  margin-top: 0.25rem;
+  margin: 6px 0 0 0;
+  line-height: 1.5;
 }
 
-.ai-suggestion__status {
+.ai-recipes__status {
   color: #2563eb;
-  font-weight: 600;
-  min-width: 180px;
+  font-weight: 700;
+  min-width: 200px;
   text-align: right;
 }
 
-.ai-suggestion__body {
-  white-space: pre-wrap;
-  background: #fff;
-  border: 1px dashed #d1d5db;
-  border-radius: 10px;
-  padding: 1rem;
-  color: #111827;
-  line-height: 1.6;
+.ai-recipes__grid {
+  margin-top: 0.5rem;
 }
 
-.ai-suggestion__body.error {
-  border-color: #fca5a5;
+.ai-error {
   color: #b91c1c;
+  padding: 0.5rem 0;
 }

@@ -216,13 +216,13 @@ async function handleAi(req, res, url) {
       const exclude = parseListParam(body.exclude);
       const question = typeof body.question === 'string' ? body.question : '';
 
-      const suggestions = await generateRecipeSuggestions({
+      const recipes = await generateRecipeSuggestions({
         ingredients,
         exclude,
         question,
       });
 
-      return sendJson(res, 200, { suggestions });
+      return sendJson(res, 200, { recipes });
     } catch (err) {
       const status = err.status || 500;
       return sendError(res, status, err.message || 'AI 추천을 불러오지 못했습니다.');

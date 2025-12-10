@@ -6,9 +6,10 @@ function createRecipeBlock(recipe) {
   const block = document.createElement('article');
   block.className = 'recipe-res-block';
 
-  const badgeHtml = recipe.personalizedMessage
-    ? `<div class="personalized-badge">${recipe.personalizedMessage}</div>`
-    : '';
+  const badges = [];
+  if (recipe.isAi) badges.push('<div class="ai-badge">AI 추천</div>');
+  if (recipe.personalizedMessage) badges.push(`<div class="personalized-badge">${recipe.personalizedMessage}</div>`);
+  const badgeHtml = badges.length ? `<div class="badge-stack">${badges.join('')}</div>` : '';
 
   const safeName = (recipe.name || '')
     .replace(/&/g, '&amp;')
