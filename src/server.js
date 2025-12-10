@@ -214,12 +214,16 @@ async function handleAi(req, res, url) {
       const body = await parseJsonBody(req);
       const ingredients = parseListParam(body.ingredients);
       const exclude = parseListParam(body.exclude);
-      const question = typeof body.question === 'string' ? body.question : '';
+      const fridgeItems = parseListParam(body.fridgeItems);
+      const preferredCategories = parseListParam(body.preferredCategories);
+      const username = typeof body.username === 'string' ? body.username : '';
 
       const recipes = await generateRecipeSuggestions({
         ingredients,
         exclude,
-        question,
+        fridgeItems,
+        preferredCategories,
+        username,
       });
 
       return sendJson(res, 200, { recipes });

@@ -39,6 +39,27 @@ async function fetchRecipeIdsByIngredients(terms) {
     .map(([recipeId]) => recipeId);
 }
 
+async function getIngredientsByRecipeIds(ids = []) {
+  const normalizedIds = ids.map(id => id && id.toString().trim()).filter(Boolean);
+  if (!normalizedIds.length) return new Map();
+
+  const query = buildQuery({
+    select: 'recipe_id,ingredient',
+    recipe_id: `in.(${normalizedIds.join(',')})`,
+  });
+
+  const rows = await supabaseRequest(`/recipe_ingredients${query}`);
+  const grouped = new Map();
+
+  rows.forEach(row => {
+    const list = grouped.get(row.recipe_id) || [];
+    if (row.ingredient) list.push(row.ingredient);
+    grouped.set(row.recipe_id, list);
+  });
+
+  return grouped;
+}
+
 async function getRecipes(params) {
   const { search, category, ingredients, exclude = [], limit, ids } = params;
   const searchParams = { select: 'id,name,category,description,time,image_url' };
@@ -204,4 +225,5 @@ export {
   getRecipeDetail,
   createRecipeWithDetails,
   findRecipeByName,
+  getIngredientsByRecipeIds,
 };

@@ -297,7 +297,7 @@ function prioritizeForUser(recipes, { preferredCategories = [], fridgeItems = []
       personalizedScore,
       personalizedMessage: personalizedScore > 0
         ? `${username || '회원'}님에게 가장 최적의 레시피에요.`
-        : null,
+        : recipe.personalizedMessage || null,
       _originalIndex: index,
     };
   });
@@ -351,20 +351,16 @@ async function loadAiRecipes({ ingredients = [], exclude = [], preferredCategori
   }
 
   aiRecipeSection.hidden = false;
-  aiStatus.textContent = 'Gemini가 맞춤 레시피를 만들고 있어요...';
+  aiStatus.textContent = '가장 알맞은 레시피를 찾고 있어요...';
   aiRecipeList.innerHTML = '';
-
-  const combinedIngredients = Array.from(new Set([...(ingredients || []), ...(fridgeItems || [])]));
-  const contextLines = [];
-  if (preferredCategories.length) contextLines.push(`선호 카테고리: ${preferredCategories.join(', ')}`);
-  if (fridgeItems.length) contextLines.push(`보유 재료: ${fridgeItems.join(', ')}`);
-  const question = contextLines.join('\n');
 
   try {
     const response = await window.apiClient.fetchAiRecipes({
-      ingredients: combinedIngredients,
+      ingredients,
       exclude,
-      question,
+      fridgeItems,
+      preferredCategories,
+      username,
     });
 
     const normalized = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
