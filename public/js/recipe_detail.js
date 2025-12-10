@@ -16,6 +16,8 @@ function renderRecipeDetail(recipe) {
     document.getElementById('recipeTime').textContent = recipe.time || '';
     document.getElementById('recipeCategory').textContent = recipe.category || '';
 
+    renderRecipeVideo(recipe);
+
     const ingredientsContainer = document.getElementById('ingredientsContainer');
     ingredientsContainer.innerHTML = '';
     if (recipe.ingredients && recipe.ingredients.length > 0) {
@@ -73,6 +75,30 @@ function renderRecipeDetail(recipe) {
         } else {
             stepsContainer.innerHTML = '<p>조리 단계 정보가 없습니다.</p>';
         }
+    }
+}
+
+function renderRecipeVideo(recipe) {
+    const videoSection = document.querySelector('.video-section');
+    const frame = document.getElementById('recipeVideoFrame');
+    const hint = document.getElementById('recipeVideoHint');
+
+    if (!videoSection || !frame) return;
+
+    const query = recipe?.name ? `${recipe.name} 레시피 조리법` : '';
+
+    if (!query) {
+        videoSection.style.display = 'none';
+        return;
+    }
+
+    const encodedQuery = encodeURIComponent(query);
+    frame.src = `https://www.youtube.com/embed?listType=search&list=${encodedQuery}`;
+    frame.title = `${recipe.name} 유튜브 조리 영상`;
+    videoSection.style.display = '';
+
+    if (hint) {
+        hint.textContent = `${recipe.name}와 관련된 유튜브 레시피 영상을 불러왔습니다.`;
     }
 }
 
