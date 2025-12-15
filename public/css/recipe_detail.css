@@ -58,7 +58,7 @@
   border-radius: 16px;
   overflow: hidden;
   flex-shrink: 0;
-  background-color: #00ff00;
+  background-color: #f3f4f6;
 }
 
 .recipe-image {
@@ -169,6 +169,58 @@
   content: '|';
   margin: 0 12px;
   color: #ddd;
+}
+
+/* ============================================ */
+/* 조리 영상 섹션 */
+/* ============================================ */
+
+.video-section {
+  width: 100%;
+  margin-bottom: 60px;
+}
+
+.video-link-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: #f5f7fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.video-link-info {
+  flex: 1;
+}
+
+.video-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff8a3d, #ff6b6b);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  box-shadow: 0 6px 14px rgba(255, 107, 107, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.video-link-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(255, 107, 107, 0.35);
+  filter: brightness(1.05);
+}
+
+.video-hint {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
 }
 
 /* ============================================ */

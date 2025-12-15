@@ -101,6 +101,18 @@
       
       <p id="resultsSubtitle" class="all-recipes-subtitle">총 0개의 레시피가 검색되었습니다.</p>
 
+      <section id="aiRecipeSection" class="ai-recipes" hidden>
+        <div class="ai-recipes__header">
+          <div>
+            <p class="ai-recipes__eyebrow">AI 추천 레시피</p>
+            <h2 class="ai-recipes__title">냉장고 재료로 바로 만들 수 있어요</h2>
+            <p class="ai-recipes__hint">입력한 재료와 취향 카테고리를 반영해 저장된 레시피로 제공합니다.</p>
+          </div>
+          <div id="aiStatus" class="ai-recipes__status" aria-live="polite"></div>
+        </div>
+        <div id="aiRecipeList" class="recipe-list grid-view ai-recipes__grid"></div>
+      </section>
+
       <div class="search-and-filter">
         <div class="filter-sort-bar">
           <select class="select-box" id="categorySelect">

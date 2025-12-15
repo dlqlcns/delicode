@@ -1,7 +1,6 @@
 // 메인 입력 필드 변수를 스크립트 최상단에서 정의
 const ingredientInput = document.getElementById('ingredientInput');
 const excludeInput = document.getElementById('excludeInput');
-
 // 띄어쓰기를 쉼표로 변환하여 검색어를 정돈하는 함수
 function autoFormatIngredients(event) {
   const input = event.target;

@@ -1,4 +1,4 @@
-import { supabaseRequest, buildQuery } from './supabaseClient.js';
+import { supabaseRequest, buildQuery, generateId } from './supabaseClient.js';
 
 function normalizeRecipe(record) {
   return {
@@ -37,6 +37,27 @@ async function fetchRecipeIdsByIngredients(terms) {
   return [...matchesByRecipe.entries()]
     .filter(([, termSet]) => termSet.size === normalizedTerms.length)
     .map(([recipeId]) => recipeId);
+}
+
+async function getIngredientsByRecipeIds(ids = []) {
+  const normalizedIds = ids.map(id => id && id.toString().trim()).filter(Boolean);
+  if (!normalizedIds.length) return new Map();
+
+  const query = buildQuery({
+    select: 'recipe_id,ingredient',
+    recipe_id: `in.(${normalizedIds.join(',')})`,
+  });
+
+  const rows = await supabaseRequest(`/recipe_ingredients${query}`);
+  const grouped = new Map();
+
+  rows.forEach(row => {
+    const list = grouped.get(row.recipe_id) || [];
+    if (row.ingredient) list.push(row.ingredient);
+    grouped.set(row.recipe_id, list);
+  });
+
+  return grouped;
 }
 
 async function getRecipes(params) {
@@ -82,6 +103,94 @@ async function getRecipes(params) {
     .map(normalizeRecipe);
 }
 
+async function findRecipeByName(name) {
+  if (!name) return null;
+  const query = buildQuery({
+    select: 'id,name,category,description,time,image_url',
+    name: `eq.${name}`,
+    limit: 1,
+  });
+
+  const records = await supabaseRequest(`/recipes${query}`);
+  const record = records?.[0];
+  return record ? normalizeRecipe(record) : null;
+}
+
+async function saveIngredients(recipeId, ingredients = []) {
+  if (!ingredients.length) return;
+
+  const payload = ingredients
+    .map(item => ({
+      recipe_id: recipeId,
+      ingredient: item.ingredient || item.name || '',
+      amount: item.amount || '',
+      unit: item.unit || '',
+    }))
+    .filter(entry => entry.ingredient);
+
+  if (!payload.length) return;
+
+  await supabaseRequest('/recipe_ingredients', {
+    method: 'POST',
+    prefer: 'resolution=merge-duplicates',
+    body: payload,
+  });
+}
+
+async function saveSteps(recipeId, steps = []) {
+  if (!steps.length) return;
+
+  const payload = steps.map((step, index) => {
+    const numericOrder = Number.isFinite(step?.step_order)
+      ? Number(step.step_order)
+      : Number.isFinite(Number(step?.order))
+        ? Number(step.order)
+        : Number.isFinite(Number(step))
+          ? Number(step)
+          : Number.isFinite(parseInt(step?.step_order, 10))
+            ? parseInt(step.step_order, 10)
+            : null;
+
+    return {
+      recipe_id: recipeId,
+      step_order: Number.isFinite(numericOrder) ? numericOrder : index + 1,
+      step_description: step?.step_description || step?.description || String(step || ''),
+    };
+  });
+
+  const filtered = payload.filter(item => item.step_description);
+  if (!filtered.length) return;
+
+  await supabaseRequest('/recipe_steps', {
+    method: 'POST',
+    prefer: 'resolution=merge-duplicates',
+    body: filtered,
+  });
+}
+
+async function createRecipeWithDetails(recipe) {
+  const id = recipe.id || generateId();
+  const payload = [{
+    id,
+    name: recipe.name,
+    category: recipe.category || '기타',
+    description: recipe.description || 'Gemini가 제안한 레시피입니다.',
+    time: recipe.time || '30분',
+    image_url: recipe.image_url || '',
+  }];
+
+  await supabaseRequest('/recipes', {
+    method: 'POST',
+    prefer: 'return=representation',
+    body: payload,
+  });
+
+  await saveIngredients(id, recipe.ingredients || []);
+  await saveSteps(id, recipe.steps || []);
+
+  return { id, ...payload[0] };
+}
+
 async function getRecipeDetail(id) {
   const detailQuery = buildQuery({
     select: 'id,name,category,description,time,image_url',
@@ -111,4 +220,10 @@ async function getRecipeDetail(id) {
   };
 }
 
-export { getRecipes, getRecipeDetail };
+export {
+  getRecipes,
+  getRecipeDetail,
+  createRecipeWithDetails,
+  findRecipeByName,
+  getIngredientsByRecipeIds,
+};

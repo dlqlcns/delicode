@@ -6,6 +6,10 @@ function createRecipeBlock(recipe) {
   const block = document.createElement('article');
   block.className = 'recipe-res-block';
 
+  const badges = [];
+  if (recipe.isAi) badges.push('<div class="ai-badge">AI 추천</div>');
+  const badgeHtml = badges.length ? `<div class="badge-stack">${badges.join('')}</div>` : '';
+
   const safeName = (recipe.name || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -13,12 +17,13 @@ function createRecipeBlock(recipe) {
     .replace(/"/g, '&quot;');
 
   block.innerHTML = `
+      ${badgeHtml}
       <button class="bookmark-btn ${recipe.bookmarked ? 'active' : ''}"
               data-bookmark-id="${recipe.id}" data-recipe-name="${safeName}" aria-label="북마크">
         ${recipe.bookmarked ? '♥' : '♡'}
       </button>
 
-    <a href="recipe_detail.html?id=${recipe.id}" class="recipe-link">
+    <a class="recipe-link" href="/recipe_detail.html?id=${encodeURIComponent(recipe.id)}" aria-label="레시피 상세 페이지로 이동">
       <div class="recipe-image-box" style="background-image: url('${recipe.image}');"></div>
 
       <div class="recipe-content">

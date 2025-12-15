@@ -4,12 +4,22 @@
 // ============================================
 
 let currentRecipes = [];
+let aiRecipes = [];
 let favoriteIds = new Set();
+let userContext = {
+  preferredCategories: [],
+  fridgeItems: [],
+  searchIngredients: [],
+  username: '',
+};
 
 const recipeList = document.getElementById('recipeList');
 const categorySelect = document.getElementById('categorySelect');
 const sortSelect = document.getElementById('sortSelect');
 const backButton = document.getElementById('backButton');
+const aiRecipeSection = document.getElementById('aiRecipeSection');
+const aiRecipeList = document.getElementById('aiRecipeList');
+const aiStatus = document.getElementById('aiStatus');
 
 function getCurrentUser() {
   try {
@@ -18,6 +28,13 @@ function getCurrentUser() {
   } catch (err) {
     return null;
   }
+}
+
+function applyBookmarkState(list) {
+  if (!Array.isArray(list)) return;
+  list.forEach(recipe => {
+    recipe.bookmarked = favoriteIds.has(String(recipe.id));
+  });
 }
 
 function getUserAllergies() {
@@ -32,6 +49,21 @@ function getUserPreferredCategories() {
   return Array.isArray(user?.ingredients)
     ? user.ingredients.map(value => value.trim()).filter(Boolean)
     : [];
+}
+
+async function getUserFridgeItems() {
+  const user = getCurrentUser();
+  if (!user) return [];
+
+  try {
+    const response = await window.apiClient.fetchUserIngredientsApi(user.id);
+    return Array.isArray(response?.ingredients)
+      ? response.ingredients.map(value => value.trim()).filter(Boolean)
+      : [];
+  } catch (err) {
+    console.error('사용자 재료 불러오기 실패', err);
+    return [];
+  }
 }
 
 function setupBackButton() {
@@ -50,16 +82,16 @@ async function syncFavorites() {
   const user = getCurrentUser();
   if (!user) {
     favoriteIds = new Set();
-    currentRecipes.forEach(recipe => { recipe.bookmarked = false; });
+    applyBookmarkState(currentRecipes);
+    applyBookmarkState(aiRecipes);
     return;
   }
 
   try {
     const response = await window.apiClient.fetchFavorites(user.id);
     favoriteIds = new Set((response.favorites || []).map(String));
-    currentRecipes.forEach(recipe => {
-      recipe.bookmarked = favoriteIds.has(String(recipe.id));
-    });
+    applyBookmarkState(currentRecipes);
+    applyBookmarkState(aiRecipes);
   } catch (err) {
     console.error(err);
   }
@@ -157,6 +189,27 @@ function displayTags(params) {
   tagContainer.style.display = tags.length > 0 ? 'flex' : 'none';
 }
 
+function renderAiRecipes(recipes) {
+  if (!aiRecipeSection || !aiRecipeList || !aiStatus) return;
+
+  aiRecipeList.innerHTML = '';
+
+  if (!recipes || recipes.length === 0) {
+    aiStatus.textContent = '추천 결과가 아직 없어요.';
+    aiRecipeSection.hidden = true;
+    return;
+  }
+
+  aiRecipeSection.hidden = false;
+  recipes.forEach(recipe => {
+    const card = createRecipeBlock({ ...recipe, isAi: true });
+
+    aiRecipeList.appendChild(card);
+  });
+
+  attachBookmarkListeners(toggleBookmark);
+}
+
 function renderRecipes(recipes) {
   const resultsSubtitle = document.getElementById('resultsSubtitle');
   if (!recipeList || !resultsSubtitle) return;
@@ -186,12 +239,6 @@ function renderRecipes(recipes) {
   recipes.forEach(recipe => {
     const card = createRecipeBlock(recipe);
 
-    card.addEventListener('click', (e) => {
-      if (!e.target.classList.contains('bookmark-btn')) {
-        window.location.href = `recipe_detail.html?id=${encodeURIComponent(recipe.id)}`;
-      }
-    });
-
     recipeList.appendChild(card);
   });
 
@@ -220,23 +267,32 @@ function sortRecipes(recipes, sortBy) {
   return sorted;
 }
 
-function prioritizePreferredCategories(recipes) {
-  const preferred = getUserPreferredCategories();
-  if (!preferred.length) return recipes;
+function prioritizeForUser(recipes, { preferredCategories = [], fridgeItems = [], searchIngredients = [], username = '' } = {}) {
+  if (!preferredCategories.length && !fridgeItems.length) return recipes;
 
-  const preferredSet = new Set(preferred);
-  const preferredRecipes = [];
-  const otherRecipes = [];
+  const preferredSet = new Set(preferredCategories);
+  const fridgeSet = new Set(fridgeItems.map(item => item.toLowerCase()));
+  const searchedSet = new Set(searchIngredients.map(item => item.toLowerCase()));
+  const sharesFridge = [...searchedSet].some(term => fridgeSet.has(term));
 
-  recipes.forEach(recipe => {
-    if (preferredSet.has(recipe.category)) {
-      preferredRecipes.push(recipe);
-    } else {
-      otherRecipes.push(recipe);
-    }
+  const decorated = recipes.map((recipe, index) => {
+    const scoreCategory = preferredSet.has(recipe.category) ? 2 : 0;
+    const scoreFridge = sharesFridge ? 1 : 0;
+    const personalizedScore = scoreCategory + scoreFridge;
+
+    return {
+      ...recipe,
+      personalizedScore,
+      _originalIndex: index,
+    };
   });
 
-  return [...preferredRecipes, ...otherRecipes];
+  decorated.sort((a, b) => {
+    if (b.personalizedScore !== a.personalizedScore) return b.personalizedScore - a.personalizedScore;
+    return a._originalIndex - b._originalIndex;
+  });
+
+  return decorated.map(({ _originalIndex, ...rest }) => rest);
 }
 
 async function toggleBookmark(id, isActive) {
@@ -248,12 +304,13 @@ async function toggleBookmark(id, isActive) {
       ? await window.apiClient.addFavoriteApi(user.id, id)
       : await window.apiClient.removeFavoriteApi(user.id, id);
     favoriteIds = new Set((response.favorites || []).map(String));
-    currentRecipes.forEach(recipe => {
-      recipe.bookmarked = favoriteIds.has(String(recipe.id));
-    });
+    applyBookmarkState(currentRecipes);
+    applyBookmarkState(aiRecipes);
     renderRecipes(currentRecipes);
+    renderAiRecipes(aiRecipes);
 
-    const target = currentRecipes.find(r => String(r.id) === String(id));
+    const allRecipes = [...currentRecipes, ...aiRecipes];
+    const target = allRecipes.find(r => String(r.id) === String(id));
     if (favoriteIds.has(String(id))) {
       showToastNotification(
         `${target?.name || '레시피'}가 즐겨찾기에 추가되었습니다.`,
@@ -269,18 +326,64 @@ async function toggleBookmark(id, isActive) {
   }
 }
 
+async function loadAiRecipes({ ingredients = [], exclude = [], preferredCategories = [], fridgeItems = [], username = '' } = {}) {
+  if (!aiRecipeSection || !aiRecipeList || !aiStatus) return;
+
+  const hasIngredients = Array.isArray(ingredients) && ingredients.length > 0;
+  if (!hasIngredients) {
+    aiRecipeSection.hidden = true;
+    return;
+  }
+
+  aiRecipeSection.hidden = false;
+  aiStatus.textContent = '가장 알맞은 레시피를 찾고 있어요...';
+  aiRecipeList.innerHTML = '';
+
+  try {
+    const response = await window.apiClient.fetchAiRecipes({
+      ingredients,
+      exclude,
+      fridgeItems,
+      preferredCategories,
+      username,
+    });
+
+    const normalized = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
+    const decorated = prioritizeForUser(normalized, { preferredCategories, fridgeItems, searchIngredients: ingredients, username });
+    aiRecipes = decorated.map(recipe => ({ ...recipe, isAi: true }));
+    applyBookmarkState(aiRecipes);
+
+    aiStatus.textContent = aiRecipes.length ? `${username || '회원'}님을 위한 AI 추천이에요.` : 'AI 추천을 찾지 못했습니다.';
+    renderAiRecipes(aiRecipes);
+  } catch (err) {
+    console.error(err);
+    aiStatus.textContent = 'AI 추천을 가져오지 못했습니다.';
+    aiRecipeList.innerHTML = '<p class="ai-error">잠시 후 다시 시도해 주세요.</p>';
+  }
+}
+
 async function loadResults() {
   const params = new URLSearchParams(window.location.search);
   const query = params.get('query') || '';
   const ingredientsParam = params.get('ingredients') || '';
   const categoryParam = params.get('category') || '';
   const excludeParam = params.get('exclude') || '';
+  const searchIngredients = ingredientsParam
+    .split(',')
+    .map(term => term.trim())
+    .filter(Boolean);
+  const user = getCurrentUser();
+  const fridgePromise = getUserFridgeItems();
+  const preferredCategories = getUserPreferredCategories();
   const userAllergies = getUserAllergies();
   const excludeTerms = excludeParam
     .split(',')
     .map(term => term.trim())
     .filter(Boolean);
   const mergedExclude = Array.from(new Set([...excludeTerms, ...userAllergies]));
+
+  aiRecipes = [];
+  renderAiRecipes(aiRecipes);
 
   if (categorySelect && categoryParam) {
     categorySelect.value = categoryParam;
@@ -298,10 +401,24 @@ async function loadResults() {
 
     currentRecipes = (response.recipes || []).map(window.apiClient.normalizeRecipeForCards);
     await syncFavorites();
+    const fridgeItems = await fridgePromise;
+    userContext = {
+      preferredCategories,
+      fridgeItems,
+      searchIngredients,
+      username: user?.username || '',
+    };
     const sorted = sortRecipes(currentRecipes, sortSelect ? sortSelect.value : '');
-    const prioritized = prioritizePreferredCategories(sorted);
+    const prioritized = prioritizeForUser(sorted, userContext);
     currentRecipes = prioritized;
     renderRecipes(currentRecipes);
+    await loadAiRecipes({
+      ingredients: searchIngredients,
+      exclude: mergedExclude,
+      preferredCategories,
+      fridgeItems,
+      username: user?.username,
+    });
   } catch (err) {
     console.error(err);
     if (recipeList) {
@@ -321,7 +438,7 @@ if (categorySelect) {
 if (sortSelect) {
   sortSelect.addEventListener('change', () => {
     const sorted = sortRecipes(currentRecipes, sortSelect.value);
-    currentRecipes = prioritizePreferredCategories(sorted);
+    currentRecipes = prioritizeForUser(sorted, userContext);
     renderRecipes(currentRecipes);
   });
 }

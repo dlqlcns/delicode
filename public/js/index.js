@@ -24,12 +24,6 @@ function renderRecipeCards() {
   recipes.forEach(recipe => {
     const card = createRecipeBlock(recipe);
 
-    card.addEventListener('click', (e) => {
-      if (!e.target.classList.contains('bookmark-btn')) {
-        window.location.href = `recipe_detail.html?id=${encodeURIComponent(recipe.id)}`;
-      }
-    });
-
     recipeGrid.appendChild(card);
   });
 
